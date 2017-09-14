@@ -116,18 +116,19 @@
 #    return a * x * x + b * x + c
 #
 #
-# def linear_fit_estimator((x1, y1), (x2, y2), x)
-#
-#    if y1 == None:
-#        return None
-#    if y2 == None:
-#        return None
-#
-#    a = (y2 - y1) / (x2 - x1)
-#    b = y1 - a * x1
-#
-#    return a * x + b
 
-# The float in the scalar must probably become a decimal because I'm gonna need equality comparison on it
+
+def linear_fit_estimator(x1, y1, x2, y2, x):
+    if y1 is None:
+        return None
+    if y2 is None:
+        return None
+    if x1 == x2:
+        raise ValueError('the specified x values must differ')
+
+    a = (y2 - y1) / (x2 - x1)
+    b = y1 - a * x1
+    return a * x + b
+
 
 
