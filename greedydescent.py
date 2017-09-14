@@ -5,37 +5,19 @@ from typing import Callable, Union, Tuple, Iterable, Optional
 Scalar = Union[float, int]
 # define vector to mean N dimensional scalar vector
 Vector = Tuple[Scalar]
+# define a type to signify the type of the cost
+TCost = float
+# define a type to signify the type of the error
+TError = float
 
 
-# I want to define a function that takes
-#
-# - a function j to minimize which takes a vector and a boolean indicating whether only cached values should be returned
-#                            and which returns a scalar option (only None if must_compute = False)
-# - an iterable yielding the initial (one or many) vectors
-# - a function C which takes x (a vector) that estimates the cost of evaluating L at x
-# - a function F which takes the estimated cost, estimated loss at x and x, and returns a comparable (number for now)
-#     where c is evaluated at x and d[i] = L(x - e_i) - L(x - 2e_i)
-#     where e_i is the unit step in the ith dimension. This means L(x - e_i) must always already have been computed
-#                                                      but L(x - 2e_i) not necessarily, in which case d[i] = None
-#
-# the output of this function is the enumerable of pairs of vectors and non-option results of L
-#
-# Implementation
-# I should probably implement this through an A* algorithm, but where there is not cost in moving
-# but where there is a cost in exploring.
-# More concretely, the comparable returned by F is what in A* would be called F
-# Hmm, then there's no use for G. So it becomes a Dijkstra's algorithm
-# so pseudo-algorithm:
-
-
-def minimize(compute_error: Callable[[Vector, bool], Optional[Scalar]],
+def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
              seeds: Iterable[Vector],
-             cost_heuristic: Callable[[Vector], float],
-             weigh: Callable[[float, float, Vector], float],
-             abort: Callable[[int, float, int], bool]=None,
+             cost_heuristic: Callable[[Vector], TCost],
+             weigh: Callable[[Optional[TError], TCost, Vector], float],
+             abort: Callable[[int, TError, int], bool]=None,
              debug: Callable[[Vector], object]=None):
     """
-
     :param compute_error: A function taking x and must_compute, indicating whether the result should be calculated
                     or whether a cached result suffices.
                   This function computes the error to minimize
@@ -48,11 +30,11 @@ def minimize(compute_error: Callable[[Vector, bool], Optional[Scalar]],
     """
 
     def cached_error(x_): return compute_error(x_, False)
-    open_list = []      # list of GreedyDescentNodes (containing a vector and scalar, the result of C)
+    open_list = []      # list of GreedyDescentNodes (containing a vector and scalar, the result of weigh)
     closed_list = set()
     minimum_bias = None
     iterations = 0
-    consecutive_higher = 0  # the number of consecutive times j(current) has been higher than its minimum thus far
+    consecutive_higher = 0  # the number of consecutive times compute_error(current) was higher than its minimum so far
 
     for seed in seeds:
         if seed not in open_list:
@@ -93,7 +75,7 @@ def get_neighbors(x) -> (Vector, int, int):
         yield compute_next_x(x, i, -1), i, -1
 
 
-def fit_loss(x, dimension, direction, cached_error: Callable[[Vector], float]):
+def fit_loss(x, dimension, direction, cached_error: Callable[[Vector], Optional[TError]]):
     """
 Estimates L at x
     :param x:
