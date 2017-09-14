@@ -1,3 +1,6 @@
+import copy
+
+
 # define 'scalar' to be 'float or int'. For now restricted to 'int'. Scaling can later be implemented to include floats
 # define vector to mean N dimensional scalar vector
 # I want to define a function that takes
@@ -59,43 +62,47 @@
 #
 #
 #
-# something wrong here. why return None sometimes? d always exist right? it depends on whether it's in open or closed
+
+
+def compute_next_x(x, dimension, direction):
+    assert direction in [-1, 1]
+    assert 0 <= dimension < len(x), "0 <= (dimension = %d) < (len(x) = %d) must hold" % (dimension, len(x))
+
+    result = copy.copy(x)
+    dx_dimension = compute_dimensional_dx(x, dimension, direction)
+    result[dimension] = result[dimension] + dx_dimension
+    return result
+
+
+def compute_dimensional_dx(x, dimension, direction):
+    """
+Computes the magnitude of dx, which is in the specified dimension and direction
+    """
+    assert direction in [-2, -1, 1, 2]
+    assert 0 <= dimension < len(x)
+
+    return direction  # for now only integer increment TODO: implement scaling to float
+
+
+# def estimate_loss(x, dimension, direction, loss):
+#     """
+# Estimates L at x
+#     :param x:
+#     :param dimension: the direction of dx that resulted in x
+#     :param direction:
+#     :param loss:
+#     :return:
+#     """
+#     assert direction in [-1, 1]
+#     assert 0 <= dimension < len(x)
 #
-# def compute_next_x(x, dimension, direction):
-#    if direction != 1 && direction != -1
-#        raise ArgumentError
-#    if dimension >= len(x)
-#        raise ArgumentError
+#     def cached_loss(direction_): (compute_next_x(x, dimension, direction_),
+#                                   loss(compute_next_x(x, dimension, direction_), False))
 #
-#    result = copy(x)
-#    dx_dimension = compute_dimensional_dx(x, dimension, direction)
-#    result[dimension] = result[dimension] + dx_dimension
-#    return result
-#
-# computes the magnitude of dx, which is in the specified dimension and direction
-# def compute_dimensional_dx(x, dimension, direction):
-#    if direction != 1 && direction != -1 && direction != 2 && direction != -2
-#        raise ArgumentError
-#    if i >= len(x)
-#        raise ArgumentError
-#
-#    return direction # for now only integer increment TODO: implement scaling to float
-#
-#
-# # estimates L at x
-# # param direction: the direction of dx that resulted in x
-# def estimate_L(x, dimension, direction):
-#    if direction != 1 && direction != -1
-#        raise ArgumentError
-#    if dimension >= len(x)
-#        raise ArgumentError
-#
-#    cached_L = direction => x_ = compute_next_x(x, dimension, direction)
-#                            return x, L(x, False)
-#    if direction == 1:
-#        return fit_estimator(cached_L(-2 * direction), cached_L(-direction), cached_L(direction))
-#    else
-#        return fit_estimator(cached_L(direction), cached_L(-direction), cached_L(-2 * direction))
+#     if direction == 1:
+#         return fit_estimator(cached_loss(-2 * direction), cached_loss(-direction), cached_loss(direction), x)
+#     else:
+#         return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x)
 
 
 def are_unique(elements):
@@ -103,16 +110,25 @@ def are_unique(elements):
     return not any(i in seen or seen.add(i) for i in elements)
 
 
-# # fits a parabola to the specified points and estimates the y value at the specified x value
-def fit_estimator(x1, y1, x2, y2, x3, y3, x):
+def fit_estimator(coordinate1, coordinate2, coordinate3, x):
+    """
+Fits a parabola to the specified coordinates and estimates the y value at the specified x value
+    :param coordinate1:
+    :param coordinate2:
+    :param coordinate3:
+    :param x:
+    :return:
+    """
+    x1, y1 = coordinate1
+    x2, y2 = coordinate2
+    x3, y3 = coordinate3
     if y1 is None:
         return linear_fit_estimator(x2, y2, x3, y3, x)
     if y2 is None:
         return linear_fit_estimator(x1, y1, x3, y3, x)
     if y3 is None:
         return linear_fit_estimator(x1, y1, x2, y2, x)
-    if not are_unique([x1, x2, x3, x]):
-        raise ValueError('The specified x values must differ')
+    assert are_unique([x1, x2, x3, x]), ValueError('The specified x values must differ')
 
     d = (x1 - x2) * (x1 - x3) * (x2 - x3)
     a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / d
@@ -132,6 +148,3 @@ def linear_fit_estimator(x1, y1, x2, y2, x):
     a = (y2 - y1) / (x2 - x1)
     b = y1 - a * x1
     return a * x + b
-
-
-
