@@ -23,7 +23,7 @@ import copy
 # Hmm, then there's no use for G. So it becomes a Dijkstra's algorithm
 # so pseudo-algorithm:
 # def minimize(L, get_seeds, C, F, abort):
-#     open_list = []      # list of tuples of vector and scalar (result of C)
+#     open_list = []      # list of GreedyDescentNodes (containing a vector and scalar, the result of C)
 #     closed_list = set()
 #     minimum_loss = None
 #     iterations = 0

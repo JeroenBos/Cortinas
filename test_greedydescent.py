@@ -1,5 +1,6 @@
 import unittest
 import greedydescent
+from GreedyDescentNode import GreedyDescentNode
 
 
 class TestLinearEstimator(unittest.TestCase):
@@ -41,5 +42,19 @@ class ComputeNeighboringXs(unittest.TestCase):
     def test_negative(self):
         next_x = greedydescent.compute_next_x([0, 0], 1, -1)
         self.assertEqual(next_x, [0, -1])
+
+
+class TestGreedyDescentNode(unittest.TestCase):
+
+    def test_ordering(self):
+        nodes = [GreedyDescentNode(None, 2),
+                 GreedyDescentNode(None, 3),
+                 GreedyDescentNode(None, 1),
+                 GreedyDescentNode(None, 0)]
+        nodes.sort()
+        self.assertEqual(nodes[0].cost, 0)
+        self.assertEqual(nodes[1].cost, 1)
+        self.assertEqual(nodes[2].cost, 2)
+        self.assertEqual(nodes[3].cost, 3)
 
 
