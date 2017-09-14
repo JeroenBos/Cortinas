@@ -22,46 +22,59 @@ import copy
 # More concretely, the comparable returned by F is what in A* would be called F
 # Hmm, then there's no use for G. So it becomes a Dijkstra's algorithm
 # so pseudo-algorithm:
-# minimize(L, get_seeds, C, F)
-#    open = []      # list of tuples of vector and scalar (result of C)
-#    closed = []
+# def minimize(L, get_seeds, C, F, abort):
+#     open_list = []      # list of tuples of vector and scalar (result of C)
+#     closed_list = set()
+#     minimum_loss = None
+#     iterations = 0
 #
-#    for seed in get_seeds():
-#        if not open.contains(seed):
-#            open.add((seed, 0))
+#     for seed in get_seeds():
+#         if seed not in open_list:
+#             open_list.append((seed, 0))
 #
-#    minimal_L = infinity
-#    iterations = 0
-#    while len(open != 0)
-#        current = open.pop()
-#        closed.add(current)
-#        x_array = get_neighbors(current) # array of tuples of vectors and dL options
-#        for x in x_array:
-#            if not open.contains(x) && not closed.contains(x)
-#                dL = compute_dL(L, x)
-#                c = C(x)
-#                f = F(x, dL, c)
-#                open.add((x, f))
-#        open.sort(key=lambda open_pair: open_pair[1]) # could be omitted through heap structure
-#        l = L(x, True)
-#        yield return l
-#
-#        minimal_L = min(minimal_L, l)
-#        if abort(iterations, minimal_)
-#            break
-#        iterations = iterations + 1
-#
+#     while len(open_list) != 0:
+#         current = open_list.pop()
+#         closed_list.add(current)
+#         x_array = get_neighbors(current)
+#         for x in x_array:
+#             if x not in open_list[0, :] and x not in closed_list:
+#                 loss_x = estimate_loss(L, x)
+#                 c = C(x)
+#                 f = F(x, loss_x, c)
+#                 open_list.append((x, f))
+#             open_list.sort(key=lambda open_pair: open_pair[1]) # PERF: could be omitted through heap structure
+#         loss = L(current, True)
+#         yield loss
+#         minimum_loss = min(minimum_loss, loss) if minimum_loss is not None else loss
+#         if abort(iterations, minimum_loss):
+#             break
+#         iterations = iterations + 1
 #
 #
-#
-#
-# def get_neighbors(x)
-#    for i in range(0, len(x)):
-#        yield compute_next_x(x, i, 1)
-#        yield compute_next_x(x, i, -1)
-#
-#
-#
+# def get_neighbors(x):
+#     for i in range(0, len(x)):
+#         yield compute_next_x(x, i, 1)
+#         yield compute_next_x(x, i, -1)
+
+
+def estimate_loss(x, dimension, direction, loss):
+    """
+Estimates L at x
+    :param x:
+    :param dimension: the direction of dx that resulted in x
+    :param direction:
+    :param loss:
+    :return:
+    """
+    assert direction in [-1, 1]
+    assert 0 <= dimension < len(x)
+
+    def cached_loss(direction_): (compute_next_x(x, dimension, direction_),
+                                  loss(compute_next_x(x, dimension, direction_), False))
+    if direction == 1:
+        return fit_estimator(cached_loss(-2 * direction), cached_loss(-direction), cached_loss(direction), x)
+    else:
+        return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x)
 
 
 def compute_next_x(x, dimension, direction):
@@ -82,27 +95,6 @@ Computes the magnitude of dx, which is in the specified dimension and direction
     assert 0 <= dimension < len(x)
 
     return direction  # for now only integer increment TODO: implement scaling to float
-
-
-# def estimate_loss(x, dimension, direction, loss):
-#     """
-# Estimates L at x
-#     :param x:
-#     :param dimension: the direction of dx that resulted in x
-#     :param direction:
-#     :param loss:
-#     :return:
-#     """
-#     assert direction in [-1, 1]
-#     assert 0 <= dimension < len(x)
-#
-#     def cached_loss(direction_): (compute_next_x(x, dimension, direction_),
-#                                   loss(compute_next_x(x, dimension, direction_), False))
-#
-#     if direction == 1:
-#         return fit_estimator(cached_loss(-2 * direction), cached_loss(-direction), cached_loss(direction), x)
-#     else:
-#         return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x)
 
 
 def are_unique(elements):
