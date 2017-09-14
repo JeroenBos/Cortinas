@@ -1,6 +1,7 @@
 class GreedyDescentNode:
 
     def __init__(self, x, cost):
+        assert cost is not None
         self.__cost = cost
         self.__x = x
 

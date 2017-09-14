@@ -1,7 +1,12 @@
 from GreedyDescentNode import GreedyDescentNode
+from typing import Callable, Union, Tuple, Iterable, Optional
 
 # define 'scalar' to be 'float or int'. For now restricted to 'int'. Scaling can later be implemented to include floats
+Scalar = Union[float, int]
 # define vector to mean N dimensional scalar vector
+Vector = Tuple[Scalar]
+
+
 # I want to define a function that takes
 #
 # - a function j to minimize which takes a vector and a boolean indicating whether only cached values should be returned
@@ -23,10 +28,29 @@ from GreedyDescentNode import GreedyDescentNode
 # so pseudo-algorithm:
 
 
-def minimize(j, seeds, cost_heuristic, F, abort=None, debug=None):
+def minimize(compute_error: Callable[[Vector, bool], Optional[Scalar]],
+             seeds: Iterable[Vector],
+             cost_heuristic: Callable[[Vector], float],
+             weigh: Callable[[float, float, Vector], float],
+             abort: Callable[[int, float, int], bool]=None,
+             debug: Callable[[Vector], object]=None):
+    """
+
+    :param compute_error: A function taking x and must_compute, indicating whether the result should be calculated
+                    or whether a cached result suffices.
+                  This function computes the error to minimize
+    :param seeds: The iterable of initial vectors in the parameter space
+    :param cost_heuristic: A function that takes x and estimates the cost of computing the error at x
+    :param weigh: A function that takes 3 parameters: estimated_error, estimated_cost, x
+                    that weighs the costs of computing the error at x against the estimated error at x
+    :param abort:
+    :param debug:
+    """
+
+    def cached_error(x_): return compute_error(x_, False)
     open_list = []      # list of GreedyDescentNodes (containing a vector and scalar, the result of C)
     closed_list = set()
-    minimum_loss = None
+    minimum_bias = None
     iterations = 0
     consecutive_higher = 0  # the number of consecutive times j(current) has been higher than its minimum thus far
 
@@ -43,46 +67,46 @@ def minimize(j, seeds, cost_heuristic, F, abort=None, debug=None):
         xdd_list = get_neighbors(current)  # xdd stands for vector, dimension, direction
         for x, dimension, direction in xdd_list:
             if x not in open_list and x not in closed_list:
-                estimated_loss = fit_loss(x, dimension, direction, j)
+                estimated_loss = fit_loss(x, dimension, direction, cached_error)
                 estimated_cost = cost_heuristic(x)
-                f = F(estimated_loss, estimated_cost, x)  # means weighted cost/loss
+                f = weigh(estimated_loss, estimated_cost, x)  # means weighted cost/loss
                 open_list.append(GreedyDescentNode(x, f))
 
         open_list.sort()  # PERF: could be omitted through heap structure
-        loss = j(current, True)
-        yield GreedyDescentNode(current, loss)
+        error = compute_error(current, True)
+        yield GreedyDescentNode(current, error)
 
-        if minimum_loss is None or loss < minimum_loss:
-            minimum_loss = loss
+        if minimum_bias is None or error < minimum_bias:
+            minimum_bias = error
             consecutive_higher = 0
         else:
             consecutive_higher = consecutive_higher + 1
 
-        if abort is not None and abort(iterations, minimum_loss, consecutive_higher):
+        if abort is not None and abort(iterations, minimum_bias, consecutive_higher):
             break
         iterations = iterations + 1
 
 
-def get_neighbors(x):
+def get_neighbors(x) -> (Vector, int, int):
     for i in range(0, len(x)):
         yield compute_next_x(x, i, 1), i, 1
         yield compute_next_x(x, i, -1), i, -1
 
 
-def fit_loss(x, dimension, direction, loss):
+def fit_loss(x, dimension, direction, cached_error: Callable[[Vector], float]):
     """
 Estimates L at x
     :param x:
     :param dimension: the direction of dx that resulted in x
     :param direction:
-    :param loss:
+    :param cached_error:
     :return:
     """
     assert direction in [-1, 1]
     assert 0 <= dimension < len(x)
 
     def cached_loss(direction_): return (compute_next_x(x, dimension, direction_),
-                                         loss(compute_next_x(x, dimension, direction_), False))
+                                         cached_error(compute_next_x(x, dimension, direction_)))
     if direction == 1:
         t1 = cached_loss(-2 * direction)
         return fit_estimator(t1, cached_loss(-direction), cached_loss(direction), x)
@@ -90,14 +114,14 @@ Estimates L at x
         return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x)
 
 
-def compute_next_x(x: tuple, dimension, direction):
+def compute_next_x(x: Vector, dimension, direction) -> Vector:
     assert direction in [-2, -1, 1, 2]
     assert 0 <= dimension < len(x), "0 <= (dimension = %d) < (len(x) = %d) must hold" % (dimension, len(x))
 
     result = list(x)
     dx_dimension = compute_dimensional_dx(x, dimension, direction)
     result[dimension] = result[dimension] + dx_dimension
-    result = tuple(result)
+    result = tuple(result)  # type: Vector
     return result
 
 

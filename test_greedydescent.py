@@ -76,7 +76,7 @@ class TestGreedyDescent(unittest.TestCase):
             f_cache[x] = result
             return result
 
-        x_seed = 1
+        x_seed = -20
 
         def j(x, must_compute: bool):
             if must_compute:
