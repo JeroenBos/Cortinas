@@ -96,26 +96,29 @@
 #        return fit_estimator(cached_L(-2 * direction), cached_L(-direction), cached_L(direction))
 #    else
 #        return fit_estimator(cached_L(direction), cached_L(-direction), cached_L(-2 * direction))
-#
-#
-# # fits a parabola to the specified points and
-# def fit_estimator((x1, y1), (x2, y2), (x3, y3), x):
-#
-#    if y1 == None:
-#        return linear_fit_estimator((x2, y2), (x3, y3), x)
-#    if y2 == None:
-#        return linear_fit_estimator((x1, y1), (x3, y3), x)
-#    if y3 == None:
-#        return linear_fit_estimator((x1, y1), (x2, y2), x)
-#
-#    D = (x1 - x2) * (x1 - x3) * (x2 - x3);
-#    a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / D;
-#    b = (x3*x3 * (y1 - y2) + x2*x2 * (y3 - y1) + x1*x1 * (y2 - y3)) / D;
-#    c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / D;
-#
-#    return a * x * x + b * x + c
-#
-#
+
+
+def are_unique(elements):
+    seen = set()
+    return not any(i in seen or seen.add(i) for i in elements)
+
+
+# # fits a parabola to the specified points and estimates the y value at the specified x value
+def fit_estimator(x1, y1, x2, y2, x3, y3, x):
+    if y1 is None:
+        return linear_fit_estimator(x2, y2, x3, y3, x)
+    if y2 is None:
+        return linear_fit_estimator(x1, y1, x3, y3, x)
+    if y3 is None:
+        return linear_fit_estimator(x1, y1, x2, y2, x)
+    if not are_unique([x1, x2, x3, x]):
+        raise ValueError('The specified x values must differ')
+
+    d = (x1 - x2) * (x1 - x3) * (x2 - x3)
+    a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / d
+    b = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / d
+    c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / d
+    return a * x * x + b * x + c
 
 
 def linear_fit_estimator(x1, y1, x2, y2, x):
@@ -124,7 +127,7 @@ def linear_fit_estimator(x1, y1, x2, y2, x):
     if y2 is None:
         return None
     if x1 == x2:
-        raise ValueError('the specified x values must differ')
+        raise ValueError('The specified x values must differ')
 
     a = (y2 - y1) / (x2 - x1)
     b = y1 - a * x1
