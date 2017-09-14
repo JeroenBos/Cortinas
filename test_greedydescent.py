@@ -36,12 +36,12 @@ class TestParabolaEstimator(unittest.TestCase):
 class ComputeNeighboringXs(unittest.TestCase):
 
     def test_simple(self):
-        next_x = greedydescent.compute_next_x([0, 0], 1, 1)
-        self.assertEqual(next_x, [0, 1])
+        next_x = greedydescent.compute_next_x((0, 0), 1, 1)
+        self.assertEqual(next_x, (0, 1))
 
     def test_negative(self):
-        next_x = greedydescent.compute_next_x([0, 0], 1, -1)
-        self.assertEqual(next_x, [0, -1])
+        next_x = greedydescent.compute_next_x((0, 0), 1, -1)
+        self.assertEqual(next_x, (0, -1))
 
 
 class TestGreedyDescentNode(unittest.TestCase):
@@ -64,3 +64,42 @@ class TestGreedyDescentNode(unittest.TestCase):
                  GreedyDescentNode(x1, 1)]
         self.assertTrue(x0 in nodes)
 
+
+class TestGreedyDescent(unittest.TestCase):
+
+    def test_parabola(self):
+        f_cache = {}
+
+        def f(x):
+            value = x[0]
+            result = value * value - 10 * value + 6
+            f_cache[x] = result
+            return result
+
+        x_seed = 1
+
+        def j(x, must_compute: bool):
+            if must_compute:
+                return f(x)
+            else:
+                return f_cache.get(x, None)
+
+        def cost_heuristic(x):
+            return 0
+
+        def weigh_cost_loss(estimated_loss, estimated_cost, x):
+            return estimated_cost
+
+        def debug(arg):
+            print(arg)
+
+        def abort(_, __, consecutive_higher):
+            return consecutive_higher > 10
+
+        for result in sorted(greedydescent.minimize(j,
+                                                    [(x_seed,)],
+                                                    cost_heuristic,
+                                                    weigh_cost_loss,
+                                                    abort=abort,
+                                                    debug=debug)):
+            print('x = ' + str(result.x) + ' with cost ' + str(result.cost))

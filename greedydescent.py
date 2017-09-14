@@ -1,15 +1,14 @@
-import copy
-
+from GreedyDescentNode import GreedyDescentNode
 
 # define 'scalar' to be 'float or int'. For now restricted to 'int'. Scaling can later be implemented to include floats
 # define vector to mean N dimensional scalar vector
 # I want to define a function that takes
 #
-# - a function L to minimize which takes a vector and a boolean indicating whether only cached values should be returned
+# - a function j to minimize which takes a vector and a boolean indicating whether only cached values should be returned
 #                            and which returns a scalar option (only None if must_compute = False)
-# - a seed mechanism to choose the initial (one or many) vectors
+# - an iterable yielding the initial (one or many) vectors
 # - a function C which takes x (a vector) that estimates the cost of evaluating L at x
-# - a function F which takes x, a gradient option vector dL in L-space and cost c and returns a comparable,
+# - a function F which takes the estimated cost, estimated loss at x and x, and returns a comparable (number for now)
 #     where c is evaluated at x and d[i] = L(x - e_i) - L(x - 2e_i)
 #     where e_i is the unit step in the ith dimension. This means L(x - e_i) must always already have been computed
 #                                                      but L(x - 2e_i) not necessarily, in which case d[i] = None
@@ -22,42 +21,55 @@ import copy
 # More concretely, the comparable returned by F is what in A* would be called F
 # Hmm, then there's no use for G. So it becomes a Dijkstra's algorithm
 # so pseudo-algorithm:
-# def minimize(L, get_seeds, C, F, abort):
-#     open_list = []      # list of GreedyDescentNodes (containing a vector and scalar, the result of C)
-#     closed_list = set()
-#     minimum_loss = None
-#     iterations = 0
-#
-#     for seed in get_seeds():
-#         if seed not in open_list:
-#             open_list.append((seed, 0))
-#
-#     while len(open_list) != 0:
-#         current = open_list.pop()
-#         closed_list.add(current)
-#         x_array = get_neighbors(current)
-#         for x in x_array:
-#             if x not in open_list and x not in closed_list:
-#                 loss_x = estimate_loss(L, x)
-#                 c = C(x)
-#                 f = F(x, loss_x, c)
-#                 open_list.append((x, f))
-#             open_list.sort(key=lambda open_pair: open_pair[1]) # PERF: could be omitted through heap structure
-#         loss = L(current, True)
-#         yield loss
-#         minimum_loss = min(minimum_loss, loss) if minimum_loss is not None else loss
-#         if abort(iterations, minimum_loss):
-#             break
-#         iterations = iterations + 1
-#
-#
-# def get_neighbors(x):
-#     for i in range(0, len(x)):
-#         yield compute_next_x(x, i, 1)
-#         yield compute_next_x(x, i, -1)
 
 
-def estimate_loss(x, dimension, direction, loss):
+def minimize(j, seeds, cost_heuristic, F, abort=None, debug=None):
+    open_list = []      # list of GreedyDescentNodes (containing a vector and scalar, the result of C)
+    closed_list = set()
+    minimum_loss = None
+    iterations = 0
+    consecutive_higher = 0  # the number of consecutive times j(current) has been higher than its minimum thus far
+
+    for seed in seeds:
+        if seed not in open_list:
+            open_list.append(GreedyDescentNode(seed, 0))
+    open_list.sort()
+
+    while len(open_list) != 0:
+        current = open_list.pop(0).x
+        if debug is not None:
+            debug(current)
+        closed_list.add(current)
+        xdd_list = get_neighbors(current)  # xdd stands for vector, dimension, direction
+        for x, dimension, direction in xdd_list:
+            if x not in open_list and x not in closed_list:
+                estimated_loss = fit_loss(x, dimension, direction, j)
+                estimated_cost = cost_heuristic(x)
+                f = F(estimated_loss, estimated_cost, x)  # means weighted cost/loss
+                open_list.append(GreedyDescentNode(x, f))
+
+        open_list.sort()  # PERF: could be omitted through heap structure
+        loss = j(current, True)
+        yield GreedyDescentNode(current, loss)
+
+        if minimum_loss is None or loss < minimum_loss:
+            minimum_loss = loss
+            consecutive_higher = 0
+        else:
+            consecutive_higher = consecutive_higher + 1
+
+        if abort is not None and abort(iterations, minimum_loss, consecutive_higher):
+            break
+        iterations = iterations + 1
+
+
+def get_neighbors(x):
+    for i in range(0, len(x)):
+        yield compute_next_x(x, i, 1), i, 1
+        yield compute_next_x(x, i, -1), i, -1
+
+
+def fit_loss(x, dimension, direction, loss):
     """
 Estimates L at x
     :param x:
@@ -69,21 +81,23 @@ Estimates L at x
     assert direction in [-1, 1]
     assert 0 <= dimension < len(x)
 
-    def cached_loss(direction_): (compute_next_x(x, dimension, direction_),
-                                  loss(compute_next_x(x, dimension, direction_), False))
+    def cached_loss(direction_): return (compute_next_x(x, dimension, direction_),
+                                         loss(compute_next_x(x, dimension, direction_), False))
     if direction == 1:
-        return fit_estimator(cached_loss(-2 * direction), cached_loss(-direction), cached_loss(direction), x)
+        t1 = cached_loss(-2 * direction)
+        return fit_estimator(t1, cached_loss(-direction), cached_loss(direction), x)
     else:
         return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x)
 
 
-def compute_next_x(x, dimension, direction):
-    assert direction in [-1, 1]
+def compute_next_x(x: tuple, dimension, direction):
+    assert direction in [-2, -1, 1, 2]
     assert 0 <= dimension < len(x), "0 <= (dimension = %d) < (len(x) = %d) must hold" % (dimension, len(x))
 
-    result = copy.copy(x)
+    result = list(x)
     dx_dimension = compute_dimensional_dx(x, dimension, direction)
     result[dimension] = result[dimension] + dx_dimension
+    result = tuple(result)
     return result
 
 
