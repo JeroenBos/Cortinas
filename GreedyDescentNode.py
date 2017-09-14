@@ -16,5 +16,10 @@ class GreedyDescentNode:
         return self.cost < other.cost
 
     def __eq__(self, other):
-        return self.__x == other.__x
+        if other is GreedyDescentNode:
+            return other.__x == self.__x
+        elif isinstance(other, type(self.__x)):
+            return other == self.__x
+        else:
+            return False
 

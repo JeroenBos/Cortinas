@@ -37,7 +37,7 @@ import copy
 #         closed_list.add(current)
 #         x_array = get_neighbors(current)
 #         for x in x_array:
-#             if x not in open_list[0, :] and x not in closed_list:
+#             if x not in open_list and x not in closed_list:
 #                 loss_x = estimate_loss(L, x)
 #                 c = C(x)
 #                 f = F(x, loss_x, c)

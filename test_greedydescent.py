@@ -57,4 +57,10 @@ class TestGreedyDescentNode(unittest.TestCase):
         self.assertEqual(nodes[2].cost, 2)
         self.assertEqual(nodes[3].cost, 3)
 
+    def test_containment(self):
+        x0 = [0]
+        x1 = [1]
+        nodes = [GreedyDescentNode(x0, 0),
+                 GreedyDescentNode(x1, 1)]
+        self.assertTrue(x0 in nodes)
 
