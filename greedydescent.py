@@ -82,14 +82,14 @@ def get_neighbors(x) -> (Vector, int, int):
         yield compute_next_x(x, i, -1), i, -1
 
 
-def fit_loss(x, dimension, direction, cached_error: Callable[[Vector], Optional[TError]], estimate_error):
+def fit_loss(x, dimension, direction, cached_error: Callable[[Vector], Optional[TError]], error_estimator):
     """
 Estimates L at x
     :param x:
     :param dimension: the direction of dx that resulted in x
     :param direction:
     :param cached_error:
-    :param estimate_error:
+    :param error_estimator:
     :return:
     """
     assert direction in [-1, 1]
@@ -101,13 +101,14 @@ Estimates L at x
         c1 = cached_loss(-2 * direction)
         c2 = cached_loss(-direction)
         c3 = cached_loss(direction)
-        return estimate_error(c1, c2, c3, x, dimension)
+        return fit_estimator(c1, c2, c3, x, dimension, error_estimator)
     else:
-        return estimate_error(cached_loss(direction),
-                              cached_loss(-direction),
-                              cached_loss(-2 * direction),
-                              x,
-                              dimension)
+        return fit_estimator(cached_loss(direction),
+                             cached_loss(-direction),
+                             cached_loss(-2 * direction),
+                             x,
+                             dimension,
+                             error_estimator)
 
 
 def compute_next_x(x: Vector, dimension, direction) -> Vector:
@@ -134,49 +135,28 @@ Computes the magnitude of dx, which is in the specified dimension and direction
     return direction  # for now only integer increment TODO: implement scaling to float
 
 
-def are_unique(elements):
-    seen = set()
-    return not any(i in seen or seen.add(i) for i in elements)
+def fit_estimator(coordinate1, coordinate2, coordinate3, v, dimension, estimator):
+    v1, error1 = coordinate1
+    v2, error2 = coordinate2
+    v3, error3 = coordinate3
+
+    if error1 is None:
+        return fit_estimator2(coordinate2, coordinate3, v, dimension, estimator)
+    if error2 is None:
+        return fit_estimator2(coordinate1, coordinate3, v, dimension, estimator)
+    if error3 is None:
+        return fit_estimator2(coordinate1, coordinate2, v, dimension, estimator)
+
+    return estimator.estimate3(coordinate1, coordinate2, coordinate3, v, dimension)
 
 
-def fit_estimator(coordinate1, coordinate2, coordinate3, v, dimension):
-    """
-Fits a parabola to the specified coordinates and estimates the y value at the specified x value
-    :param coordinate1:
-    :param coordinate2:
-    :param coordinate3:
-    :param v:
-    :param dimension:
-    :return:
-    """
-    v1, y1 = coordinate1
-    v2, y2 = coordinate2
-    v3, y3 = coordinate3
-    x1, x2, x3, x = v1[dimension], v2[dimension], v3[dimension], v[dimension]
+def fit_estimator2(coordinate1, coordinate2, v, dimension, estimator):
+    v1, error1 = coordinate1
+    v2, error2 = coordinate2
 
-    if y1 is None:
-        return linear_fit_estimator(x2, y2, x3, y3, x)
-    if y2 is None:
-        return linear_fit_estimator(x1, y1, x3, y3, x)
-    if y3 is None:
-        return linear_fit_estimator(x1, y1, x2, y2, x)
-    assert are_unique([x1, x2, x3, x]), ValueError('The specified x values must differ')
-
-    d = (x1 - x2) * (x1 - x3) * (x2 - x3)
-    a = (x3 * (y2 - y1) + x2 * (y1 - y3) + x1 * (y3 - y2)) / d
-    b = (x3 * x3 * (y1 - y2) + x2 * x2 * (y3 - y1) + x1 * x1 * (y2 - y3)) / d
-    c = (x2 * x3 * (x2 - x3) * y1 + x3 * x1 * (x3 - x1) * y2 + x1 * x2 * (x1 - x2) * y3) / d
-    return a * x * x + b * x + c
-
-
-def linear_fit_estimator(x1, y1, x2, y2, x):
-    if y1 is None:
+    if error1 is None:
         return None
-    if y2 is None:
+    if error2 is None:
         return None
-    if x1 == x2:
-        raise ValueError('The specified x values must differ')
 
-    a = (y2 - y1) / (x2 - x1)
-    b = y1 - a * x1
-    return a * x + b
+    return estimator.estimate2(coordinate1, coordinate2, v, dimension)

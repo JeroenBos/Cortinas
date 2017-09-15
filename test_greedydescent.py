@@ -1,35 +1,36 @@
 import unittest
 import greedydescent
 from GreedyDescentNode import GreedyDescentNode
+from LinearEstimator import LinearEstimator
 
 
 class TestLinearEstimator(unittest.TestCase):
 
     def test_simple(self):
-        y = greedydescent.linear_fit_estimator(1, 1, 2, 2, 3)
+        y = greedydescent.fit_estimator2(((1,), 1), ((2,), 2), (3,), 0, LinearEstimator)
         self.assertEqual(y, 3)
 
     def test_simple_floats(self):
-        y = greedydescent.linear_fit_estimator(1.0, 1.0, 2.0, 2.0, 4.0)
+        y = greedydescent.fit_estimator2(((1.0,), 1.0), ((2.0,), 2.0), (4.0,), 0, LinearEstimator)
         self.assertEqual(y, 4.0)
 
-    def test_xs_must_differ(self):
-        with self.assertRaises(ValueError):
-            greedydescent.linear_fit_estimator(1.0, 1.0, 1.0, 1.0, 4.0)
+    # def test_xs_must_differ(self):
+    #     with self.assertRaises(ValueError):
+    #         greedydescent.fit_estimator2((1.0, 1.0), (1.0, 1.0), 4.0, 0, LinearEstimator)
 
 
 class TestParabolaEstimator(unittest.TestCase):
 
     def test_simple(self):
-        y = greedydescent.fit_estimator(((0,), 0), ((1,), 1), ((2,), 4), (3,), 0)
+        y = greedydescent.fit_estimator(((0,), 0), ((1,), 1), ((2,), 4), (3,), 0, LinearEstimator)
         self.assertEqual(y, 9)
 
-    def test_not_so_simple(self):
-        y = greedydescent.fit_estimator(((-2,), 20), ((1,), -7), ((2,), 8), (0.5,), 0)  # 6 x^2 - 3 x - 10
+    def test_not_so_simple(self):  # 6 x^2 - 3 x - 10
+        y = greedydescent.fit_estimator(((-2,), 20), ((1,), -7), ((2,), 8), (0.5,), 0, LinearEstimator)
         self.assertEqual(y, -10.0)
 
     def test_deferral_to_linear(self):
-        y = greedydescent.fit_estimator(((1,), None), ((1,), 1), ((2,), 2), (3,), 0)
+        y = greedydescent.fit_estimator(((1,), None), ((1,), 1), ((2,), 2), (3,), 0, LinearEstimator)
         self.assertEqual(y, 3)
 
 
@@ -100,7 +101,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                     [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
-                                                    greedydescent.fit_estimator,
+                                                    LinearEstimator,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
@@ -145,7 +146,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                     [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
-                                                    greedydescent.fit_estimator,
+                                                    LinearEstimator,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
@@ -190,7 +191,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                     [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
-                                                    TestErrorData.estimate,
+                                                    TestErrorData,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
@@ -204,17 +205,23 @@ class TestErrorData:
     def __lt__(self, other):
         return self.__magnitude < other.__magnitude
 
-    def __float__(self):
-        return self.__magnitude
-
     def __repr__(self):
         return str(self.__magnitude)
 
     @staticmethod
-    def estimate(c1, c2, c3, v, dimension):
+    def estimate3(c1, c2, c3, v, dimension):
         return greedydescent.fit_estimator((c1[0], c1[1].__magnitude if c1[1] is not None else None),
                                            (c2[0], c2[1].__magnitude if c2[1] is not None else None),
                                            (c3[0], c3[1].__magnitude if c3[1] is not None else None),
                                            v,
-                                           dimension)
+                                           dimension,
+                                           LinearEstimator)
+
+    @staticmethod
+    def estimate2(c1, c2, v, dimension):
+        return greedydescent.fit_estimator2((c1[0], c1[1].__magnitude if c1[1] is not None else None),
+                                            (c2[0], c2[1].__magnitude if c2[1] is not None else None),
+                                            v,
+                                            dimension,
+                                            LinearEstimator)
 
