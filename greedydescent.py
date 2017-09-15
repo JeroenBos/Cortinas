@@ -91,15 +91,15 @@ Estimates L at x
     assert direction in [-1, 1]
     assert 0 <= dimension < len(x)
 
-    def cached_loss(direction_): return (compute_next_x_at_d(x, dimension, direction_),
+    def cached_loss(direction_): return (compute_next_x(x, dimension, direction_),
                                          cached_error(compute_next_x(x, dimension, direction_)))
     if direction == 1:
         c1 = cached_loss(-2 * direction)
         c2 = cached_loss(-direction)
         c3 = cached_loss(direction)
-        return fit_estimator(c1, c2, c3, x[dimension])
+        return fit_estimator(c1, c2, c3, x, dimension)
     else:
-        return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x[dimension])
+        return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x, dimension)
 
 
 def compute_next_x(x: Vector, dimension, direction) -> Vector:
@@ -131,18 +131,21 @@ def are_unique(elements):
     return not any(i in seen or seen.add(i) for i in elements)
 
 
-def fit_estimator(coordinate1, coordinate2, coordinate3, x):
+def fit_estimator(coordinate1, coordinate2, coordinate3, v, dimension):
     """
 Fits a parabola to the specified coordinates and estimates the y value at the specified x value
     :param coordinate1:
     :param coordinate2:
     :param coordinate3:
-    :param x:
+    :param v:
+    :param dimension:
     :return:
     """
-    x1, y1 = coordinate1
-    x2, y2 = coordinate2
-    x3, y3 = coordinate3
+    v1, y1 = coordinate1
+    v2, y2 = coordinate2
+    v3, y3 = coordinate3
+    x1, x2, x3, x = v1[dimension], v2[dimension], v3[dimension], v[dimension]
+
     if y1 is None:
         return linear_fit_estimator(x2, y2, x3, y3, x)
     if y2 is None:
