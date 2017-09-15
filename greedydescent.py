@@ -9,13 +9,14 @@ Vector = Tuple[Scalar]
 TCost = float
 # define a type to signify the type of the error
 TError = float
+Coordinate = Tuple[Vector, Optional[TError]]
 
 
 def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
              seeds: Iterable[Vector],
              cost_heuristic: Callable[[Vector], TCost],
              weigh: Callable[[Optional[TError], TCost, Vector], float],
-             estimate_error: Callable[[Optional[Vector],Optional[Vector],Optional[Vector],Vector,int],Optional[TError]],
+             estimate_error: Callable[[Coordinate, Coordinate, Coordinate, Vector, int], Optional[TError]],
              abort: Callable[[int, TError, int], bool]=None,
              debug: Callable[[Vector], object]=None):
     """
