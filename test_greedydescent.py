@@ -149,3 +149,72 @@ class TestGreedyDescent(unittest.TestCase):
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
+
+    def test_error_type_parameter(self):
+
+        f_cache = {}
+
+        def f(coordinate):
+            x, y = coordinate
+            result_ = ErrorData(x * x - 10 * x + 6 * y + x * y + y * y)
+
+            nonlocal f_cache
+            f_cache[coordinate] = result_
+            return result_
+
+        seed = (10, 10)
+
+        def j(x, must_compute: bool):
+            if must_compute:
+                return f(x)
+            else:
+                nonlocal f_cache
+                result_ = f_cache.get(x, None)
+                return result_
+
+        def cost_heuristic(x):
+            return 0
+
+        def weigh_cost_loss(estimated_loss, estimated_cost, x):
+            if estimated_loss is not None:
+                return estimated_loss
+            return estimated_loss if estimated_loss is not None else 0
+
+        def debug(arg):
+            print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
+
+        def abort(_, __, consecutive_higher):
+            return consecutive_higher > 20
+
+        for result in sorted(greedydescent.minimize(j,
+                                                    [seed],
+                                                    cost_heuristic,
+                                                    weigh_cost_loss,
+                                                    ErrorData.estimate,
+                                                    abort=abort,
+                                                    debug=debug)):
+            print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
+
+
+class ErrorData:
+
+    def __init__(self, magnitude):
+        self.__magnitude = magnitude
+
+    def __lt__(self, other):
+        return self.__magnitude < other.__magnitude
+
+    def __float__(self):
+        return self.__magnitude
+
+    def __repr__(self):
+        return str(self.__magnitude)
+
+    @staticmethod
+    def estimate(c1, c2, c3, v, dimension):
+        return greedydescent.fit_estimator((c1[0], c1[1].__magnitude if c1[1] is not None else None),
+                                           (c2[0], c2[1].__magnitude if c2[1] is not None else None),
+                                           (c3[0], c3[1].__magnitude if c3[1] is not None else None),
+                                           v,
+                                           dimension)
+

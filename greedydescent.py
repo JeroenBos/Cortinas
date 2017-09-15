@@ -88,6 +88,7 @@ Estimates L at x
     :param dimension: the direction of dx that resulted in x
     :param direction:
     :param cached_error:
+    :param estimate_error:
     :return:
     """
     assert direction in [-1, 1]
