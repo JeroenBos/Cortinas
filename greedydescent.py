@@ -15,6 +15,7 @@ def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
              seeds: Iterable[Vector],
              cost_heuristic: Callable[[Vector], TCost],
              weigh: Callable[[Optional[TError], TCost, Vector], float],
+             estimate_error: Callable[[Optional[Vector],Optional[Vector],Optional[Vector],Vector,int],Optional[TError]],
              abort: Callable[[int, TError, int], bool]=None,
              debug: Callable[[Vector], object]=None):
     """
@@ -25,6 +26,7 @@ def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
     :param cost_heuristic: A function that takes x and estimates the cost of computing the error at x
     :param weigh: A function that takes 3 parameters: estimated_error, estimated_cost, x
                     that weighs the costs of computing the error at x against the estimated error at x
+    :param estimate_error:
     :param abort:
     :param debug:
     """
@@ -51,7 +53,7 @@ def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
         xdd_list = get_neighbors(current)  # xdd stands for vector, dimension, direction
         for x, dimension, direction in xdd_list:
             if x not in closed_list:
-                estimated_loss = fit_loss(x, dimension, direction, cached_error)
+                estimated_loss = fit_loss(x, dimension, direction, cached_error, estimate_error)
                 estimated_cost = cost_heuristic(x)
                 f = weigh(estimated_loss, estimated_cost, x)  # means weighted cost/loss
                 if x in open_list:
@@ -79,7 +81,7 @@ def get_neighbors(x) -> (Vector, int, int):
         yield compute_next_x(x, i, -1), i, -1
 
 
-def fit_loss(x, dimension, direction, cached_error: Callable[[Vector], Optional[TError]]):
+def fit_loss(x, dimension, direction, cached_error: Callable[[Vector], Optional[TError]], estimate_error):
     """
 Estimates L at x
     :param x:
@@ -97,9 +99,13 @@ Estimates L at x
         c1 = cached_loss(-2 * direction)
         c2 = cached_loss(-direction)
         c3 = cached_loss(direction)
-        return fit_estimator(c1, c2, c3, x, dimension)
+        return estimate_error(c1, c2, c3, x, dimension)
     else:
-        return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x, dimension)
+        return estimate_error(cached_loss(direction),
+                              cached_loss(-direction),
+                              cached_loss(-2 * direction),
+                              x,
+                              dimension)
 
 
 def compute_next_x(x: Vector, dimension, direction) -> Vector:

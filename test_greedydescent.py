@@ -100,6 +100,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                     [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
+                                                    greedydescent.fit_estimator,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
@@ -144,6 +145,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                     [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
+                                                    greedydescent.fit_estimator,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
