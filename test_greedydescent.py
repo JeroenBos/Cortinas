@@ -1,37 +1,31 @@
 import unittest
 import greedydescent
 from GreedyDescentNode import GreedyDescentNode
-from LinearEstimator import LinearEstimator
+from OneDimensionalEstimator import OneDimensionalEstimator
+from ParabolicEstimationTechnique import ParabolicEstimationTechnique
+from ComputerAndEstimator import ComputerAndEstimator
 
 
 class TestLinearEstimator(unittest.TestCase):
 
     def test_simple(self):
-        y = greedydescent.fit_estimator2(((1,), 1), ((2,), 2), (3,), 0, LinearEstimator)
+        y = ParabolicEstimationTechnique.estimate([(1, 1), (2, 2)], 3)
         self.assertEqual(y, 3)
 
     def test_simple_floats(self):
-        y = greedydescent.fit_estimator2(((1.0,), 1.0), ((2.0,), 2.0), (4.0,), 0, LinearEstimator)
+        y = ParabolicEstimationTechnique.estimate([(1.0, 1.0), (2.0, 2.0)], 4.0)
         self.assertEqual(y, 4.0)
-
-    # def test_xs_must_differ(self):
-    #     with self.assertRaises(ValueError):
-    #         greedydescent.fit_estimator2((1.0, 1.0), (1.0, 1.0), 4.0, 0, LinearEstimator)
 
 
 class TestParabolaEstimator(unittest.TestCase):
 
     def test_simple(self):
-        y = greedydescent.fit_estimator(((0,), 0), ((1,), 1), ((2,), 4), (3,), 0, LinearEstimator)
+        y = ParabolicEstimationTechnique.estimate([(0, 0), (1, 1), (2, 4)], 3)
         self.assertEqual(y, 9)
 
     def test_not_so_simple(self):  # 6 x^2 - 3 x - 10
-        y = greedydescent.fit_estimator(((-2,), 20), ((1,), -7), ((2,), 8), (0.5,), 0, LinearEstimator)
+        y = ParabolicEstimationTechnique.estimate([(-2, 20), (1, -7), (2, 8)], 0.5)
         self.assertEqual(y, -10.0)
-
-    def test_deferral_to_linear(self):
-        y = greedydescent.fit_estimator(((1,), None), ((1,), 1), ((2,), 2), (3,), 0, LinearEstimator)
-        self.assertEqual(y, 3)
 
 
 class ComputeNeighboringXs(unittest.TestCase):
@@ -69,21 +63,13 @@ class TestGreedyDescentNode(unittest.TestCase):
 class TestGreedyDescent(unittest.TestCase):
 
     def test_parabola(self):
-        f_cache = {}
 
         def f(x):
             value = x[0]
-            result = value * value - 10 * value + 6
-            f_cache[x] = result
-            return result
+            result_ = value * value - 10 * value + 6
+            return result_
 
         seed = (-20,)
-
-        def j(x, must_compute: bool):
-            if must_compute:
-                return f(x)
-            else:
-                return f_cache.get(x, None)
 
         def cost_heuristic(x):
             return 0
@@ -97,36 +83,27 @@ class TestGreedyDescent(unittest.TestCase):
         def abort(_, __, consecutive_higher):
             return consecutive_higher > 10
 
-        for result in sorted(greedydescent.minimize(j,
-                                                    [seed],
-                                                    cost_heuristic,
-                                                    weigh_cost_loss,
-                                                    LinearEstimator,
-                                                    abort=abort,
-                                                    debug=debug)):
-            print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
+        def get_technique(get_cached):
+            return OneDimensionalEstimator(ParabolicEstimationTechnique, get_cached)
+
+        result = sorted(greedydescent.minimize(ComputerAndEstimator(f, get_technique),
+                                               [seed],
+                                               cost_heuristic,
+                                               weigh_cost_loss,
+                                               abort=abort,
+                                               debug=debug))
+        self.assertEqual(result[0].x, (5,))
+        for r in result:
+            print('x = ' + str(r.x) + ' with cost ' + str(r.cost))
 
     def test_hyper_parabola(self):
-
-        f_cache = {}
 
         def f(coordinate):
             x, y = coordinate
             result_ = x * x - 10 * x + 6 * y + x * y + y * y
-
-            nonlocal f_cache
-            f_cache[coordinate] = result_
             return result_
 
         seed = (10, 10)
-
-        def j(x, must_compute: bool):
-            if must_compute:
-                return f(x)
-            else:
-                nonlocal f_cache
-                result_ = f_cache.get(x, None)
-                return result_
 
         def cost_heuristic(x):
             return 0
@@ -142,36 +119,27 @@ class TestGreedyDescent(unittest.TestCase):
         def abort(_, __, consecutive_higher):
             return consecutive_higher > 20
 
-        for result in sorted(greedydescent.minimize(j,
-                                                    [seed],
-                                                    cost_heuristic,
-                                                    weigh_cost_loss,
-                                                    LinearEstimator,
-                                                    abort=abort,
-                                                    debug=debug)):
-            print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
+        def get_technique(get_cached):
+            return OneDimensionalEstimator(ParabolicEstimationTechnique, get_cached)
+
+        result = sorted(greedydescent.minimize(ComputerAndEstimator(f, get_technique),
+                                               [seed],
+                                               cost_heuristic,
+                                               weigh_cost_loss,
+                                               abort=abort,
+                                               debug=debug))
+        self.assertEqual(result[0].x, (8, -7))
+        for r in result:
+            print('x = ' + str(r.x) + ' with cost ' + str(r.cost))
 
     def test_error_type_parameter(self):
-
-        f_cache = {}
 
         def f(coordinate):
             x, y = coordinate
             result_ = TestErrorData(x * x - 10 * x + 6 * y + x * y + y * y)
-
-            nonlocal f_cache
-            f_cache[coordinate] = result_
             return result_
 
         seed = (10, 10)
-
-        def j(x, must_compute: bool):
-            if must_compute:
-                return f(x)
-            else:
-                nonlocal f_cache
-                result_ = f_cache.get(x, None)
-                return result_
 
         def cost_heuristic(x):
             return 0
@@ -187,11 +155,13 @@ class TestGreedyDescent(unittest.TestCase):
         def abort(_, __, consecutive_higher):
             return consecutive_higher > 20
 
-        for result in sorted(greedydescent.minimize(j,
+        def get_technique(get_cached):
+            return OneDimensionalEstimator(ParabolicEstimationTechnique, get_cached)
+
+        for result in sorted(greedydescent.minimize(ComputerAndEstimator(f, get_technique),
                                                     [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
-                                                    TestErrorData,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
@@ -207,21 +177,3 @@ class TestErrorData:
 
     def __repr__(self):
         return str(self.__magnitude)
-
-    @staticmethod
-    def estimate3(c1, c2, c3, v, dimension):
-        return greedydescent.fit_estimator((c1[0], c1[1].__magnitude if c1[1] is not None else None),
-                                           (c2[0], c2[1].__magnitude if c2[1] is not None else None),
-                                           (c3[0], c3[1].__magnitude if c3[1] is not None else None),
-                                           v,
-                                           dimension,
-                                           LinearEstimator)
-
-    @staticmethod
-    def estimate2(c1, c2, v, dimension):
-        return greedydescent.fit_estimator2((c1[0], c1[1].__magnitude if c1[1] is not None else None),
-                                            (c2[0], c2[1].__magnitude if c2[1] is not None else None),
-                                            v,
-                                            dimension,
-                                            LinearEstimator)
-

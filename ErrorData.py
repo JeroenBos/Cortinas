@@ -1,4 +1,4 @@
-class TestErrorData:
+class ErrorData:
 
     def __init__(self, train_set_bias: float, dev_set_bias: float):
         self.__train_bias = train_set_bias
@@ -13,18 +13,11 @@ class TestErrorData:
         return self.__dev_bias
 
     def __lt__(self, other):
-        return self.__magnitude < other.__magnitude
+        return 0.5 * (self.train_bias - self.dev_bias) ** 2\
+               + self.train_bias ** 2\
+               + self.dev_bias ** 2
 
     def __repr__(self):
         def format_digits(x):
             return str(round(x, 2))
         return '(train bias = %s, dev bias = %s)'.format(format_digits(self.train_bias), format_digits(self.dev_bias))
-
-    @staticmethod
-    def estimate(c1, c2, c3, v, dimension):
-        return greedydescent.fit_estimator((c1[0], c1[1].__magnitude if c1[1] is not None else None),
-                                           (c2[0], c2[1].__magnitude if c2[1] is not None else None),
-                                           (c3[0], c3[1].__magnitude if c3[1] is not None else None),
-                                           v,
-                                           dimension)
-
