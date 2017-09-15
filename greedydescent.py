@@ -50,11 +50,14 @@ def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
 
         xdd_list = get_neighbors(current)  # xdd stands for vector, dimension, direction
         for x, dimension, direction in xdd_list:
-            if x not in open_list and x not in closed_list:
+            if x not in closed_list:
                 estimated_loss = fit_loss(x, dimension, direction, cached_error)
                 estimated_cost = cost_heuristic(x)
                 f = weigh(estimated_loss, estimated_cost, x)  # means weighted cost/loss
-                open_list.append(GreedyDescentNode(x, f))
+                if x in open_list:
+                    open_list[open_list.index(x)] = GreedyDescentNode(x, min(f, open_list[open_list.index(x)].cost))
+                else:
+                    open_list.append(GreedyDescentNode(x, f))
         open_list.sort()  # PERF: could be omitted through heap structure
 
         yield GreedyDescentNode(current, error)
