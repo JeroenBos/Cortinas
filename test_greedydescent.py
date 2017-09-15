@@ -76,7 +76,7 @@ class TestGreedyDescent(unittest.TestCase):
             f_cache[x] = result
             return result
 
-        x_seed = -20
+        seed = (-20,)
 
         def j(x, must_compute: bool):
             if must_compute:
@@ -97,7 +97,52 @@ class TestGreedyDescent(unittest.TestCase):
             return consecutive_higher > 10
 
         for result in sorted(greedydescent.minimize(j,
-                                                    [(x_seed,)],
+                                                    [seed],
+                                                    cost_heuristic,
+                                                    weigh_cost_loss,
+                                                    abort=abort,
+                                                    debug=debug)):
+            print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
+
+    def test_hyper_parabola(self):
+
+        f_cache = {}
+
+        def f(coordinate):
+            x, y = coordinate
+            result_ = x * x - 10 * x + 6 * y + x * y + y * y
+
+            nonlocal f_cache
+            f_cache[coordinate] = result_
+            return result_
+
+        seed = (10, 10)
+
+        def j(x, must_compute: bool):
+            if must_compute:
+                return f(x)
+            else:
+                nonlocal f_cache
+                result_ = f_cache.get(x, None)
+                return result_
+
+        def cost_heuristic(x):
+            return 0
+
+        def weigh_cost_loss(estimated_loss, estimated_cost, x):
+            if estimated_loss is not None:
+                return estimated_loss
+            return (estimated_loss if estimated_loss is not None else 0) - estimated_cost
+
+        def debug(arg):
+            print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
+
+        def abort(_, __, consecutive_higher):
+            return consecutive_higher > 20
+
+
+        for result in sorted(greedydescent.minimize(j,
+                                                    [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
                                                     abort=abort,

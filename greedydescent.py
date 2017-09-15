@@ -45,7 +45,9 @@ def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
         current = open_list.pop(0).x
         if debug is not None:
             debug(current)
+        error = compute_error(current, True)
         closed_list.add(current)
+
         xdd_list = get_neighbors(current)  # xdd stands for vector, dimension, direction
         for x, dimension, direction in xdd_list:
             if x not in open_list and x not in closed_list:
@@ -53,9 +55,8 @@ def minimize(compute_error: Callable[[Vector, bool], Optional[TError]],
                 estimated_cost = cost_heuristic(x)
                 f = weigh(estimated_loss, estimated_cost, x)  # means weighted cost/loss
                 open_list.append(GreedyDescentNode(x, f))
-
         open_list.sort()  # PERF: could be omitted through heap structure
-        error = compute_error(current, True)
+
         yield GreedyDescentNode(current, error)
 
         if minimum_bias is None or error < minimum_bias:
@@ -87,13 +88,15 @@ Estimates L at x
     assert direction in [-1, 1]
     assert 0 <= dimension < len(x)
 
-    def cached_loss(direction_): return (compute_next_x(x, dimension, direction_),
+    def cached_loss(direction_): return (compute_next_x_at_d(x, dimension, direction_),
                                          cached_error(compute_next_x(x, dimension, direction_)))
     if direction == 1:
-        t1 = cached_loss(-2 * direction)
-        return fit_estimator(t1, cached_loss(-direction), cached_loss(direction), x)
+        c1 = cached_loss(-2 * direction)
+        c2 = cached_loss(-direction)
+        c3 = cached_loss(direction)
+        return fit_estimator(c1, c2, c3, x[dimension])
     else:
-        return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x)
+        return fit_estimator(cached_loss(direction), cached_loss(-direction), cached_loss(-2 * direction), x[dimension])
 
 
 def compute_next_x(x: Vector, dimension, direction) -> Vector:
@@ -101,10 +104,13 @@ def compute_next_x(x: Vector, dimension, direction) -> Vector:
     assert 0 <= dimension < len(x), "0 <= (dimension = %d) < (len(x) = %d) must hold" % (dimension, len(x))
 
     result = list(x)
-    dx_dimension = compute_dimensional_dx(x, dimension, direction)
-    result[dimension] = result[dimension] + dx_dimension
+    result[dimension] = compute_next_x_at_d(x, dimension, direction)
     result = tuple(result)  # type: Vector
     return result
+
+
+def compute_next_x_at_d(x: Vector, dimension: int, direction):
+    return x[dimension] + compute_dimensional_dx(x, dimension, direction)
 
 
 def compute_dimensional_dx(x, dimension, direction):
