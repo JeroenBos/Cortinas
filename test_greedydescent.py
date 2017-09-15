@@ -156,7 +156,7 @@ class TestGreedyDescent(unittest.TestCase):
 
         def f(coordinate):
             x, y = coordinate
-            result_ = ErrorData(x * x - 10 * x + 6 * y + x * y + y * y)
+            result_ = TestErrorData(x * x - 10 * x + 6 * y + x * y + y * y)
 
             nonlocal f_cache
             f_cache[coordinate] = result_
@@ -190,13 +190,13 @@ class TestGreedyDescent(unittest.TestCase):
                                                     [seed],
                                                     cost_heuristic,
                                                     weigh_cost_loss,
-                                                    ErrorData.estimate,
+                                                    TestErrorData.estimate,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
 
 
-class ErrorData:
+class TestErrorData:
 
     def __init__(self, magnitude):
         self.__magnitude = magnitude
