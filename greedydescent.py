@@ -14,7 +14,7 @@ Coordinate = Tuple[Vector, Optional[TError]]
 
 
 def minimize(error_computer: ComputerAndEstimator,
-             seeds: Iterable[Vector],
+             seeds,
              cost_heuristic: Callable[[Vector], TCost],
              abort: Callable[[int, TError, int], bool]=None,
              debug: Callable[[Vector], object]=None,
