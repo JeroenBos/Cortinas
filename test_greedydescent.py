@@ -74,7 +74,7 @@ class TestGreedyDescent(unittest.TestCase):
         def cost_heuristic(x):
             return 0
 
-        def weigh_cost_loss(estimated_loss, estimated_cost, x):
+        def weigh_cost_loss(_estimated_loss, estimated_cost, x):
             return estimated_cost
 
         def debug(arg):
@@ -89,9 +89,9 @@ class TestGreedyDescent(unittest.TestCase):
         result = sorted(greedydescent.minimize(ComputerAndEstimator(f, get_technique),
                                                [seed],
                                                cost_heuristic,
-                                               weigh_cost_loss,
                                                abort=abort,
-                                               debug=debug))
+                                               debug=debug,
+                                               weigh=weigh_cost_loss))
         self.assertEqual(result[0].x, (5,))
         for r in result:
             print('x = ' + str(r.x) + ' with cost ' + str(r.cost))
@@ -125,9 +125,9 @@ class TestGreedyDescent(unittest.TestCase):
         result = sorted(greedydescent.minimize(ComputerAndEstimator(f, get_technique),
                                                [seed],
                                                cost_heuristic,
-                                               weigh_cost_loss,
                                                abort=abort,
-                                               debug=debug))
+                                               debug=debug,
+                                               weigh=weigh_cost_loss))
         self.assertEqual(result[0].x, (8, -7))
         for r in result:
             print('x = ' + str(r.x) + ' with cost ' + str(r.cost))
@@ -144,11 +144,6 @@ class TestGreedyDescent(unittest.TestCase):
         def cost_heuristic(x):
             return 0
 
-        def weigh_cost_loss(estimated_loss, estimated_cost, x):
-            if estimated_loss is not None:
-                return estimated_loss
-            return estimated_loss if estimated_loss is not None else 0
-
         def debug(arg):
             print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
 
@@ -161,7 +156,6 @@ class TestGreedyDescent(unittest.TestCase):
         for result in sorted(greedydescent.minimize(ComputerAndEstimator(f, get_technique),
                                                     [seed],
                                                     cost_heuristic,
-                                                    weigh_cost_loss,
                                                     abort=abort,
                                                     debug=debug)):
             print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
@@ -175,5 +169,23 @@ class TestErrorData:
     def __lt__(self, other):
         return self.__magnitude < other.__magnitude
 
+    def __float__(self):
+        return float(self.__magnitude)
+
     def __repr__(self):
         return str(self.__magnitude)
+
+    def weigh(self, _cost, _v):
+        return self if self is not None else 0
+
+    def __add__(self, other):
+        return TestErrorData(self.__magnitude + other.__magnitude)
+
+    def __sub__(self, other):
+        return TestErrorData(self.__magnitude - other.__magnitude)
+
+    def __mul__(self, other):
+        return TestErrorData(self.__magnitude * other)
+
+    def __truediv__(self, other):
+        return TestErrorData(self.__magnitude / other)

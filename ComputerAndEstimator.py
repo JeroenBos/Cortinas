@@ -8,7 +8,6 @@ class ComputerAndEstimator:
         """
         self.__cache = {}
         self.estimate = get_estimator(self._get_cached).estimate
-        print(type(self.estimate))
         self.__compute = compute
 
     def _get_cached(self, v):

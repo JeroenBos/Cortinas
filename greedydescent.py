@@ -16,18 +16,19 @@ Coordinate = Tuple[Vector, Optional[TError]]
 def minimize(error_computer: ComputerAndEstimator,
              seeds: Iterable[Vector],
              cost_heuristic: Callable[[Vector], TCost],
-             weigh: Callable[[Optional[TError], TCost, Vector], float],
              abort: Callable[[int, TError, int], bool]=None,
-             debug: Callable[[Vector], object]=None):
+             debug: Callable[[Vector], object]=None,
+             weigh=None):
     """
     :param error_computer: An ComputerAndEstimator which caches and computes the error to minimize.
     :param seeds: The iterable of initial vectors in the parameter space
     :param cost_heuristic: A function that takes x and estimates the cost of computing the error at x
-    :param weigh: A function that takes 3 parameters: estimated_error, estimated_cost, x
-                    that weighs the costs of computing the error at x against the estimated error at x
     :param abort:
     :param debug:
+    :param weigh:
     """
+
+    weigh = weigh if weigh is not None else lambda error_, cost_, x_: error_.weigh(cost_, x_)
 
     open_list = []      # list of GreedyDescentNodes (containing a vector and scalar, the result of weigh)
     closed_list = set()

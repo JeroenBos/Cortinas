@@ -48,13 +48,13 @@ Fits a line to the specified coordinates in the specified dimension and estimate
     :param x:
     :return:
     """
-        x1, error1 = coordinate1
-        x2, error2 = coordinate2
+        x1, y1 = coordinate1
+        x2, y2 = coordinate2
 
-        assert error1 is not None
-        assert error2 is not None
+        assert y1 is not None
+        assert y2 is not None
         assert x1 is not x2, 'The specified x values must differ'
 
-        a = (error2 - error1) / (x2 - x1)
-        b = error1 - a * x1
+        a = (y2 - y1) / (x2 - x1)
+        b = y1 - a * x1
         return a * x + b
