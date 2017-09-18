@@ -15,8 +15,15 @@ y = [p[1] for p in pts]
 plt.scatter(x, y, zorder=1)
 plt.xlim(0, 1)
 plt.ylim(0, 1)
-plt.gca().axes.get_xaxis().set_ticks([])
-plt.gca().axes.get_yaxis().set_ticks([])
+axes = plt.gca().axes
+axes.get_xaxis().set_ticks([])
+axes.get_xaxis().set_label_coords(.75, -0.025)
+axes.get_yaxis().set_ticks([])
+axes.get_yaxis().set_label_coords(-0.025, .75)
 
-
+plt.xlabel('underfitting')
+plt.ylabel('overfitting')
+plt.text(1.02, 1.02, 'random')
+plt.text(-0.14, -0.04, 'perfect')
+plt.subplots_adjust(left=0.3)
 plt.show()
