@@ -1,9 +1,15 @@
 import unittest
 import greedydescent
 from GreedyDescentNode import GreedyDescentNode
-from OneDimensionalEstimator import OneDimensionalEstimator
-from ParabolicEstimationTechnique import ParabolicEstimationTechnique
+from Estimation.OneDimensionalEstimator import OneDimensionalEstimator
+from Estimation.ParabolicEstimationTechnique import ParabolicEstimationTechnique
 from ComputerAndEstimator import ComputerAndEstimator
+from HyperparameterDistributions.NaturalNumberDistribution import NaturalNumberDistribution
+from HyperparameterDistributions.RealNumberDistribution import RealNumberDistribution
+from HyperparameterDistributions.CollectionDistribution import CollectionDistribution
+from HyperparameterDimension import HyperparameterDimension
+from Hyperparameter import Hyperparameter
+
 
 
 class TestLinearEstimator(unittest.TestCase):
@@ -26,17 +32,6 @@ class TestParabolaEstimator(unittest.TestCase):
     def test_not_so_simple(self):  # 6 x^2 - 3 x - 10
         y = ParabolicEstimationTechnique.estimate([(-2, 20), (1, -7), (2, 8)], 0.5)
         self.assertEqual(y, -10.0)
-
-
-class ComputeNeighboringXs(unittest.TestCase):
-
-    def test_simple(self):
-        next_x = greedydescent.compute_next_x((0, 0), 1, 1)
-        self.assertEqual(next_x, (0, 1))
-
-    def test_negative(self):
-        next_x = greedydescent.compute_next_x((0, 0), 1, -1)
-        self.assertEqual(next_x, (0, -1))
 
 
 class TestGreedyDescentNode(unittest.TestCase):
@@ -64,12 +59,14 @@ class TestGreedyDescent(unittest.TestCase):
 
     def test_parabola(self):
 
+        dimensions = [HyperparameterDimension(key='0', distribution=RealNumberDistribution())]
+
         def f(x):
             value = x[0]
             result_ = value * value - 10 * value + 6
             return result_
 
-        seed = (-20,)
+        seed = Hyperparameter(dimensions, [-20])
 
         def cost_heuristic(x):
             return 0
@@ -98,14 +95,17 @@ class TestGreedyDescent(unittest.TestCase):
 
     def test_hyper_parabola(self):
 
+        dimensions = [HyperparameterDimension(key='0', distribution=RealNumberDistribution()),
+                      HyperparameterDimension(key='1', distribution=RealNumberDistribution())]
+
         def f(coordinate):
             x, y = coordinate
             result_ = x * x - 10 * x + 6 * y + x * y + y * y
             return result_
 
-        seed = (10, 10)
+        seed = Hyperparameter(dimensions, [10, 10])
 
-        def cost_heuristic(x):
+        def cost_heuristic(_x):
             return 0
 
         def weigh_cost_loss(estimated_loss, estimated_cost, x):
@@ -113,8 +113,8 @@ class TestGreedyDescent(unittest.TestCase):
                 return estimated_loss
             return (estimated_loss if estimated_loss is not None else 0) - estimated_cost
 
-        def debug(arg):
-            print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
+        def debug(_arg):
+            pass  # print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
 
         def abort(_, __, consecutive_higher):
             return consecutive_higher > 20
@@ -134,18 +134,21 @@ class TestGreedyDescent(unittest.TestCase):
 
     def test_error_type_parameter(self):
 
+        dimensions = [HyperparameterDimension(key='0', distribution=NaturalNumberDistribution()),
+                      HyperparameterDimension(key='1', distribution=NaturalNumberDistribution())]
+
         def f(coordinate):
             x, y = coordinate
             result_ = TestErrorData(x * x - 10 * x + 6 * y + x * y + y * y)
             return result_
 
-        seed = (10, 10)
+        seed = Hyperparameter(dimensions, [10, 10])
 
         def cost_heuristic(x):
             return 0
 
         def debug(arg):
-            print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
+            pass  # print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
 
         def abort(_, __, consecutive_higher):
             return consecutive_higher > 20

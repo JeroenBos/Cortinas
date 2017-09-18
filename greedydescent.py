@@ -49,15 +49,16 @@ def minimize(error_computer: ComputerAndEstimator,
         closed_list.add(current)
 
         xdd_list = get_neighbors(current)  # xdd stands for vector, dimension, direction
-        for x, dimension, direction in xdd_list:
+        for x, dx in xdd_list:
             if x not in closed_list:
-                estimated_error = error_computer.estimate(x, dimension, direction)
-                estimated_cost = cost_heuristic(x)
-                f = weigh(estimated_error, estimated_cost, x)  # means weighted cost/loss
-                if x in open_list:
-                    open_list[open_list.index(x)] = GreedyDescentNode(x, min(f, open_list[open_list.index(x)].cost))
-                else:
-                    open_list.append(GreedyDescentNode(x, f))
+                estimated_error = error_computer.estimate(x, dx)
+                if estimated_error is not None:
+                    estimated_cost = cost_heuristic(x)
+                    f = weigh(estimated_error, estimated_cost, x)  # means weighted cost/loss
+                    if x in open_list:
+                        open_list[open_list.index(x)] = GreedyDescentNode(x, min(f, open_list[open_list.index(x)].cost))
+                    else:
+                        open_list.append(GreedyDescentNode(x, f))
         open_list.sort()  # PERF: could be omitted through heap structure
 
         yield GreedyDescentNode(current, error)
@@ -73,31 +74,13 @@ def minimize(error_computer: ComputerAndEstimator,
         iterations = iterations + 1
 
 
-def get_neighbors(x) -> (Vector, int, int):
-    for i in range(0, len(x)):
-        yield compute_next_x(x, i, 1), i, 1
-        yield compute_next_x(x, i, -1), i, -1
+def get_neighbors(v) -> (Vector, int, int):
+    for dimension in v.dimensions:
+        for step in [1, -1]:
+            new_v = v.step(dimension, step)
+            if new_v is not None:
+                yield new_v, (dimension, step)
 
 
-def compute_next_x(x, dimension, direction) -> Vector:
-    assert direction in [-2, -1, 1, 2]
-    assert 0 <= dimension < len(x), "0 <= (dimension = %d) < (len(x) = %d) must hold" % (dimension, len(x))
-
-    result = list(x)
-    result[dimension] = compute_next_x_at_d(x, dimension, direction)
-    result = tuple(result)  # type: Vector
-    return result
 
 
-def compute_next_x_at_d(x, dimension: int, direction):
-    return x[dimension] + compute_dimensional_dx(x, dimension, direction)
-
-
-def compute_dimensional_dx(x, dimension, direction):
-    """
-Computes the magnitude of dx, which is in the specified dimension and direction
-    """
-    assert direction in [-2, -1, 1, 2]
-    assert 0 <= dimension < len(x)
-
-    return direction  # for now only integer increment TODO: implement scaling to float
