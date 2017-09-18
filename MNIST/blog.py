@@ -115,7 +115,7 @@ def create_net_shape(**kwargs):
     for key in kwargs.keys():
         args[key] = kwargs[key]
 
-    return NeuralNet(args)
+    return NeuralNet(**args)
 
 
 def show_test(index_image):
