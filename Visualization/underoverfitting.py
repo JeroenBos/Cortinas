@@ -41,6 +41,7 @@ def _update_plot(pts):
     x = [p[0] for p in pts]
     y = [p[1] for p in pts]
 
+    plt.gca().set_color_cycle(None)
     plt.scatter(x, y, zorder=1, marker='x')
     plt.xlim(0, 1)
     plt.ylim(0, 1)
