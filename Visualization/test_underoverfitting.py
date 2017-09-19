@@ -3,6 +3,8 @@ from Visualization.underoverfitting import plot, scale_batch
 import MNIST.blog
 import underoverfitting
 import matplotlib.pyplot as plt
+import time
+import copy
 
 class TestPlots(unittest.TestCase):
 
@@ -20,8 +22,15 @@ class TestPlots(unittest.TestCase):
     def test_plot_MNIST(self):
         train_data, train_truths, dev_data, dev_truths, _, __ = MNIST.blog.load_dataset()
 
-        accuracies = underoverfitting.train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, max_epochs=2)
-        pts = scale_batch(accuracies)
+        underoverfitting.train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, max_epochs=5)
 
-        plt.show(block=True)
+    def test_plot_thread(self):
+        pts = [[0.1, 0.2], [0.3, 0.4]]
+        plot(copy.copy(pts))
+
+        time.sleep(3)
+        pts.append([0.15, 0.16])
+        pts.append([0.07, 0.08])
+        plot(pts)
+
 

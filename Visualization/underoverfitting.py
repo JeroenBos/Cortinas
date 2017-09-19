@@ -2,13 +2,40 @@ import os
 import matplotlib.pyplot as plt
 from scipy.misc import imread
 import matplotlib.cbook as cbook
+import multiprocessing
+import queue
 
 path = os.path.dirname(os.path.realpath(__file__))
 _background = imread(cbook.get_sample_data(os.path.join(path, 'background underoverfitting.png')))
+q = None
+refresh_rate = 1  # in seconds
 
 
-def plot(pts):
+def plot(new_pts):
+    global q
+    if q is None:
+        q = multiprocessing.JoinableQueue()
+        process = multiprocessing.Process(target=_worker, args=(q,))
+        process.start()
+    q.put(new_pts)
+
+
+def _worker(local_queue):
+    while True:
+        try:
+            new_pts = local_queue.get(False)
+        except queue.Empty:
+            # on empty queue yield control back to the plot
+            plt.pause(refresh_rate)
+            pass
+        else:
+            _update_plot(new_pts)
+            local_queue.task_done()
+
+
+def _update_plot(pts):
     plt.ion()
+    plt.show()
     plt.imshow(_background, zorder=0, extent=[0, 1, 0, 1])
 
     x = [p[0] for p in pts]
@@ -28,7 +55,9 @@ def plot(pts):
     plt.text(1.02, 1.02, 'random')
     plt.text(-0.14, -0.04, 'perfect')
     plt.subplots_adjust(left=0.3)
-    plt.pause(0.01)
+
+    plt.draw()
+    plt.pause(refresh_rate)
 
 
 def scale(train_accuracy, dev_accuracy):
