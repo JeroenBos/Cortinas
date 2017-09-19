@@ -14,7 +14,9 @@ class TestPlots(unittest.TestCase):
     def test_MNINST(self):
         train_data, train_truths, dev_data, dev_truths, _, __ = MNIST.blog.load_dataset()
 
-        p = underoverfitting.train_and_predict(train_data, train_truths, dev_data, dev_truths, max_epochs=2)[-1]
+        p = underoverfitting.train_and_predict(train_data, train_truths, dev_data, dev_truths,
+                                               MNIST.blog.create_net_shape,
+                                               max_epochs=2)[-1]
 
         self.assertIsInstance(p[0], float)
         self.assertIsInstance(p[1], float)
@@ -22,7 +24,9 @@ class TestPlots(unittest.TestCase):
     def test_plot_MNIST(self):
         train_data, train_truths, dev_data, dev_truths, _, __ = MNIST.blog.load_dataset()
 
-        underoverfitting.train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, max_epochs=5)
+        underoverfitting.train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths,
+                                                    MNIST.blog.create_net_shape,
+                                                    max_epochs=5)
 
     def test_plot_thread(self):
         pts = [[0.1, 0.2], [0.3, 0.4]]

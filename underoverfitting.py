@@ -6,7 +6,7 @@ import math
 import Visualization.underoverfitting
 
 
-def train_and_predict(train_data, train_truths, dev_data, dev_truths, dev_func=None, **nn_kwargs):
+def train_and_predict(train_data, train_truths, dev_data, dev_truths, create_nn, dev_func=None, **nn_kwargs):
     print("Device: " + theano.config.device)
 
     result = []
@@ -19,18 +19,18 @@ def train_and_predict(train_data, train_truths, dev_data, dev_truths, dev_func=N
         if dev_func is not None:
             dev_func(result)
 
-    nn = MNIST.blog.create_net_shape(**nn_kwargs, on_epoch_finished=[dev])
+    nn = create_nn(**nn_kwargs, on_epoch_finished=[dev])
     nn.fit(train_data, train_truths)
 
     return result
 
 
-def train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, **nn_kwargs):
+def train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, create_nn, **nn_kwargs):
     def plot(accuracies):
         pts = Visualization.underoverfitting.scale_batch(accuracies)
         Visualization.underoverfitting.plot(pts)
 
-    return train_and_predict(train_data, train_truths, dev_data, dev_truths, plot, **nn_kwargs)
+    return train_and_predict(train_data, train_truths, dev_data, dev_truths, create_nn, plot, **nn_kwargs)
 
 
 def get_accuracy(input_layer, output_layer, data, truths, dev_batch_size):
