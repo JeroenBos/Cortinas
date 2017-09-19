@@ -3,9 +3,10 @@ import lasagne
 import MNIST.blog
 import numpy as np
 import math
+import Visualization.underoverfitting
 
 
-def train_and_predict(train_data, train_truths, dev_data, dev_truths, **nn_kwargs):
+def train_and_predict(train_data, train_truths, dev_data, dev_truths, dev_func=None, **nn_kwargs):
     print("Device: " + theano.config.device)
 
     result = []
@@ -15,10 +16,21 @@ def train_and_predict(train_data, train_truths, dev_data, dev_truths, **nn_kwarg
         dev_accuracy = get_accuracy(nn2.layers_[0], nn2.layers_[-1], dev_data, dev_truths, 100)
         result.append((train_accuracy, dev_accuracy))
 
+        if dev_func is not None:
+            dev_func(result)
+
     nn = MNIST.blog.create_net_shape(**nn_kwargs, on_epoch_finished=[dev])
     nn.fit(train_data, train_truths)
 
     return result
+
+
+def train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, **nn_kwargs):
+    def plot(accuracies):
+        pts = Visualization.underoverfitting.scale_batch(accuracies)
+        Visualization.underoverfitting.plot(pts)
+
+    return train_and_predict(train_data, train_truths, dev_data, dev_truths, plot, **nn_kwargs)
 
 
 def get_accuracy(input_layer, output_layer, data, truths, dev_batch_size):
