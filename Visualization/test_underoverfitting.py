@@ -1,5 +1,5 @@
 import unittest
-from Visualization.underoverfitting import plot
+from Visualization.underoverfitting import plot, scale
 import MNIST.blog
 import underoverfitting
 
@@ -17,4 +17,11 @@ class TestPlots(unittest.TestCase):
         self.assertIsInstance(p[0], float)
         self.assertIsInstance(p[1], float)
 
+    def test_plot_MNIST(self):
+        train_data, train_truths, dev_data, dev_truths, _, __ = MNIST.blog.load_dataset()
+
+        accuracies = underoverfitting.train_and_predict(train_data, train_truths, dev_data, dev_truths, max_epochs=2)
+        pts = [scale(train_accuracy, dev_accuracy) for train_accuracy, dev_accuracy in accuracies]
+
+        plot(pts)
 

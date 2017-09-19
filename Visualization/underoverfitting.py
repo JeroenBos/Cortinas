@@ -29,4 +29,7 @@ def plot(pts):
     plt.show()
 
 
+def scale(train_accuracy, dev_accuracy):
+    """ Converts training and dev accuracies to corresponding locations in the plot"""
+    return 1 - train_accuracy, 1 - dev_accuracy
 

@@ -21,10 +21,6 @@ def train_and_predict(train_data, train_truths, dev_data, dev_truths, **nn_kwarg
     return result
 
 
-
-
-
-
 def get_accuracy(input_layer, output_layer, data, truths, dev_batch_size):
     dev_batch_size = dev_batch_size if dev_batch_size != 0 else data.shape[0]
     n_batches = int(math.ceil(data.shape[0] / dev_batch_size))
