@@ -8,15 +8,21 @@ import math
 def train_and_predict(train_data, train_truths, dev_data, dev_truths, **nn_kwargs):
     print("Device: " + theano.config.device)
 
-    nn = MNIST.blog.create_net_shape(**nn_kwargs)
+    result = []
 
+    def dev(nn2, history):
+        train_accuracy = history[-1]['valid_accuracy']
+        dev_accuracy = get_accuracy(nn2.layers_[0], nn2.layers_[-1], dev_data, dev_truths, 100)
+        result.append((train_accuracy, dev_accuracy))
+
+    nn = MNIST.blog.create_net_shape(**nn_kwargs, on_epoch_finished=[dev])
     nn.fit(train_data, train_truths)
 
-    train_accuracy = nn.train_history_[-1]['valid_accuracy']
+    return result
 
-    dev_accuracy = get_accuracy(nn.layers_[0], nn.layers_[-1], dev_data, dev_truths, 100)
 
-    return train_accuracy, dev_accuracy
+
+
 
 
 def get_accuracy(input_layer, output_layer, data, truths, dev_batch_size):
@@ -34,7 +40,6 @@ def get_accuracy(input_layer, output_layer, data, truths, dev_batch_size):
 
     accuracy = np.mean(val_predictions == truths)
     return accuracy
-
 
 
 

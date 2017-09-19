@@ -12,8 +12,9 @@ class TestPlots(unittest.TestCase):
     def test_MNINST(self):
         train_data, train_truths, dev_data, dev_truths, _, __ = MNIST.blog.load_dataset()
 
-        p = underoverfitting.train_and_predict(train_data, train_truths, dev_data, dev_truths, max_epochs=2)
+        p = underoverfitting.train_and_predict(train_data, train_truths, dev_data, dev_truths, max_epochs=2)[-1]
 
         self.assertIsInstance(p[0], float)
         self.assertIsInstance(p[1], float)
+
 
