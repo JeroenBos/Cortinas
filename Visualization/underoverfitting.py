@@ -1,4 +1,6 @@
 import os
+from threading import Lock
+
 import matplotlib.pyplot as plt
 from scipy.misc import imread
 import matplotlib.cbook as cbook
@@ -7,8 +9,8 @@ import queue
 
 path = os.path.dirname(os.path.realpath(__file__))
 _background = imread(cbook.get_sample_data(os.path.join(path, 'background underoverfitting.png')))
+refresh_rate = 0.1  # in seconds
 q = None
-refresh_rate = 1  # in seconds
 
 
 def plot(new_pts):
@@ -22,15 +24,54 @@ def plot(new_pts):
 
 def _worker(local_queue):
     while True:
+        new_pts = None
         try:
             new_pts = local_queue.get(False)
+            while True:
+                new_pts = local_queue.get(False)
+                local_queue.task_done()
         except queue.Empty:
+            if new_pts is not None:
+                _update_plot(new_pts)
+                local_queue.task_done()
+        # on empty or non-empty queue: yield control back to the plot
+        plt.pause(refresh_rate)
+
+"""
+def plot(new_pts):
+    assert new_pts is not None
+
+    global started_thread, lock, pts_shared_container
+    if not started_thread:
+        pts_shared_container = [None]
+        started_thread = True
+        lock = Lock()
+        process = multiprocessing.Process(target=_worker, args=(pts_shared_container, lock))
+        process.start()
+
+    lock.acquire(blocking=True)
+    pts_shared_container[0] = new_pts
+    lock.release()
+
+
+def _worker(pts_shared_container_, lock_):
+    while True:
+
+        new_pts = None
+        acquired_lock = lock_.acquire(timeout=0.05)
+        if acquired_lock:
+            if pts_shared_container_[0] is not None:
+                new_pts = pts_shared_container_[0]
+                pts_shared_container_[0] = None
+            lock_.release()
+
+        if new_pts is not None:
+            _update_plot(new_pts)
+        else:
             # on empty queue yield control back to the plot
             plt.pause(refresh_rate)
-            pass
-        else:
-            _update_plot(new_pts)
-            local_queue.task_done()
+
+"""
 
 
 def _update_plot(pts):
@@ -70,4 +111,3 @@ def scale_batch(accuracies):
     """ Converts a list of 2-tuples containing the training and dev accuracies for different hyperparameters,
     and converts them to corresponding locations in the plot"""
     return [scale(train_accuracy, dev_accuracy) for train_accuracy, dev_accuracy in accuracies]
-
