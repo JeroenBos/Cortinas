@@ -1,6 +1,3 @@
-import theano
-theano.config.optimizer='None'
-
 import numpy as np
 import lasagne
 from lasagne import layers
@@ -11,7 +8,6 @@ import random
 
 
 def create_net_shape(**kwargs):
-    from nolearn.lasagne import BatchIterator
     args = {'layers': [('input', layers.InputLayer),
                        ('dense1', layers.DenseLayer),
                        ('dropout1', layers.DropoutLayer),
@@ -39,7 +35,7 @@ def create_net_shape(**kwargs):
             # optimization method params
             'update_learning_rate': 0.01,
             'update_momentum': 0.9,
-            'max_epochs': 50,
+            'max_epochs': 5,
             'verbose': 1}
 
     # override default arguments with specified arguments
@@ -47,7 +43,7 @@ def create_net_shape(**kwargs):
         args[key] = kwargs[key]
 
     nn = NeuralNet(**args)
-    nn.initialize()  # TODO: probably shouldn't be here
+    nn.initialize()
     return nn
 
 
@@ -64,8 +60,6 @@ def do():
     train_truths = np.array([truth(x) for x in train_data]).astype(np.int32)
     dev_truths = np.array([truth(x) for x in dev_data]).astype(np.int32)
 
-    print('data shape {}'.format(train_data.shape))
-    print('truth shape {}'.format(train_truths.shape))
     underoverfitting.train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, create_net_shape)
 
 
