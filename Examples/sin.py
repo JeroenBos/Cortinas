@@ -1,4 +1,5 @@
 import lasagne
+import math
 from lasagne import layers
 import lasagne.updates
 from Examples.General1D import train, create_nn
@@ -36,11 +37,14 @@ def create_net_shape(**kwargs):
                       'verbose': 1}, kwargs)
 
 
-CLASS_SIZE = 10
+CLASS_SIZE = 50
 
 
 def truth(x):
-    return int(x * CLASS_SIZE)
+    x_denormalized = x * 10
+    result = math.sin(x_denormalized)
+    result_classified = int((result + 1) / 2 * CLASS_SIZE)
+    return result_classified
 
 
 if __name__ == '__main__':
