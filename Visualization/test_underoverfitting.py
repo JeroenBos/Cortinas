@@ -1,10 +1,10 @@
 import unittest
-from Visualization.underoverfitting import plot, scale_batch
+from Visualization.underoverfitting import plot
 import MNIST.blog
 import underoverfitting
-import matplotlib.pyplot as plt
 import time
 import copy
+
 
 class TestPlots(unittest.TestCase):
 
@@ -36,5 +36,3 @@ class TestPlots(unittest.TestCase):
         pts.append([0.15, 0.16])
         pts.append([0.07, 0.08])
         plot(pts)
-
-

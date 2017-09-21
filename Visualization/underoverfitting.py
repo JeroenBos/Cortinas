@@ -1,6 +1,4 @@
 import os
-from threading import Lock
-
 import matplotlib.pyplot as plt
 from scipy.misc import imread
 import matplotlib.cbook as cbook
@@ -37,42 +35,6 @@ def _worker(local_queue):
         # on empty or non-empty queue: yield control back to the plot
         plt.pause(refresh_rate)
 
-"""
-def plot(new_pts):
-    assert new_pts is not None
-
-    global started_thread, lock, pts_shared_container
-    if not started_thread:
-        pts_shared_container = [None]
-        started_thread = True
-        lock = Lock()
-        process = multiprocessing.Process(target=_worker, args=(pts_shared_container, lock))
-        process.start()
-
-    lock.acquire(blocking=True)
-    pts_shared_container[0] = new_pts
-    lock.release()
-
-
-def _worker(pts_shared_container_, lock_):
-    while True:
-
-        new_pts = None
-        acquired_lock = lock_.acquire(timeout=0.05)
-        if acquired_lock:
-            if pts_shared_container_[0] is not None:
-                new_pts = pts_shared_container_[0]
-                pts_shared_container_[0] = None
-            lock_.release()
-
-        if new_pts is not None:
-            _update_plot(new_pts)
-        else:
-            # on empty queue yield control back to the plot
-            plt.pause(refresh_rate)
-
-"""
-
 
 def _update_plot(pts):
     plt.ion()
@@ -82,7 +44,6 @@ def _update_plot(pts):
     x = [p[0] for p in pts]
     y = [p[1] for p in pts]
 
-    plt.gca().set_color_cycle(None)
     plt.scatter(x, y, zorder=1, marker='x')
     plt.xlim(0, 1)
     plt.ylim(0, 1)
@@ -91,6 +52,7 @@ def _update_plot(pts):
     axes.get_xaxis().set_label_coords(.75, -0.025)
     axes.get_yaxis().set_ticks([])
     axes.get_yaxis().set_label_coords(-0.025, .75)
+    axes.set_prop_cycle(None)
 
     plt.xlabel('underfitting')
     plt.ylabel('overfitting')

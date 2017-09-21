@@ -1,6 +1,5 @@
 import theano
 import lasagne
-import MNIST.blog
 import numpy as np
 import math
 import Visualization.underoverfitting
@@ -52,8 +51,3 @@ def get_accuracy(input_layer, output_layer, data, truths, dev_batch_size):
 
     accuracy = np.mean(val_predictions == truths)
     return accuracy
-
-
-
-
-
