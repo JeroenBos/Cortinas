@@ -33,7 +33,7 @@ def create_net_shape(**kwargs):
             # optimization method params
             'update_learning_rate': 0.01,
             'update_momentum': 0.9,
-            'max_epochs': 5000,
+            'max_epochs': 50,
             'verbose': 1}
 
     # override default arguments with specified arguments
