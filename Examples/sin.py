@@ -39,7 +39,7 @@ def create_net_shape(**kwargs):
             # optimization method params
             'update_learning_rate': 0.01,
             'update_momentum': 0.9,
-            'max_epochs': 5,
+            'max_epochs': 50,
             'verbose': 1}
 
     # override default arguments with specified arguments
@@ -66,13 +66,13 @@ def do():
 
     print('data shape {}'.format(train_data.shape))
     print('truth shape {}'.format(train_truths.shape))
-    underoverfitting.train_and_predict(train_data, train_truths, dev_data, dev_truths, create_net_shape)  # TODO add _and_plot
+    underoverfitting.train_and_predict_and_plot(train_data, train_truths, dev_data, dev_truths, create_net_shape)
 
 
 def truth(x):
     return int(x[0] * 10)
 
-do()
 
-# it seems that truth(x) shouldn't return a list
-# next idea: find out where the 128 comes from
+if __name__ == '__main__':
+    do()
+
