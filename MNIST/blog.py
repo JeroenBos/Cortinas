@@ -70,6 +70,7 @@ def load_dataset():
 
 
 def create_net_shape(**kwargs):
+    kwargs['input_shape'] = (None, 1, 28, 28)
     args = {'layers': [('input', layers.InputLayer),
                        ('conv2d1', layers.Conv2DLayer),
                        ('maxpool1', layers.MaxPool2DLayer),
@@ -80,7 +81,6 @@ def create_net_shape(**kwargs):
                        ('dropout2', layers.DropoutLayer),
                        ('output', layers.DenseLayer),
                        ],
-            'input_shape': (None, 1, 28, 28),
             # layer conv2d1
             'conv2d1_num_filters': 32,
             'conv2d1_filter_size': (5, 5),
