@@ -8,6 +8,9 @@ import Visualization.underoverfitting
 
 def train_and_predict(train_data, train_truths, dev_data, dev_truths, create_nn, dev_func=None, **nn_kwargs):
     print("Device: " + theano.config.device)
+    assert 'output_num_units' not in nn_kwargs.keys()
+    assert 'input_shape' not in nn_kwargs.keys()
+    assert 'on_epoch_finished' not in nn_kwargs.keys()
 
     result = []
 
@@ -19,7 +22,8 @@ def train_and_predict(train_data, train_truths, dev_data, dev_truths, create_nn,
         if dev_func is not None:
             dev_func(result)
 
-    nn = create_nn(**nn_kwargs, on_epoch_finished=[dev])
+    truths_count = len(set(train_truths))
+    nn = create_nn(**nn_kwargs, on_epoch_finished=[dev], input_shape=train_data.shape, output_num_units=truths_count)
     nn.fit(train_data, train_truths)
 
     return result
