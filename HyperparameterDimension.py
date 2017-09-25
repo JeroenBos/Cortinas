@@ -1,5 +1,5 @@
-from HyperparameterDistributions import RealNumberDistribution
-from Hyperparameter import  Hyperparameter
+from HyperparameterDistributions.RealNumberDistribution import RealNumberDistribution
+from Hyperparameter import Hyperparameter
 
 
 class HyperparameterDimension:
@@ -7,6 +7,10 @@ class HyperparameterDimension:
     @property
     def key(self):
         return self.__key
+
+    @property
+    def distribution(self):
+        return self.__distribution
 
     def __init__(self, key, distribution=None):
         assert not isinstance(key, int)
