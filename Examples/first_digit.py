@@ -1,7 +1,8 @@
 import lasagne
 from lasagne import layers
 import lasagne.updates
-from Examples.General1D import train, create_nn
+from Examples.General1D import train
+from LasagneComputerAndEstimator import create_nn
 
 
 def create_net_shape(**kwargs):

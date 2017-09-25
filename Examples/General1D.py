@@ -1,7 +1,6 @@
 import numpy as np
 import underoverfitting
 import random
-from nolearn.lasagne import NeuralNet
 
 
 def train(truth_f, truth_f_class_range_size, create_net_shape):
@@ -32,10 +31,3 @@ def train(truth_f, truth_f_class_range_size, create_net_shape):
                                                 output_num_units=truth_f_class_range_size)
 
 
-def create_nn(args, overriding_args):
-    for key in overriding_args.keys():
-        args[key] = overriding_args[key]
-
-    nn = NeuralNet(**args)
-    nn.initialize()
-    return nn
