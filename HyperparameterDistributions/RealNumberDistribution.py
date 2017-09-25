@@ -9,3 +9,7 @@ class RealNumberDistribution:
     def get(index, _default):
         assert isinstance(index, int)
         return index
+
+    @staticmethod
+    def default():
+        return 0

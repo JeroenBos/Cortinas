@@ -9,3 +9,6 @@ class CollectionDistribution:
     def get(self, index, _default):
         assert isinstance(index, int)
         return self.__collection[index] if 0 <= index < len(self.__collection) else None
+
+    def default(self):
+        return self.__collection[len(self.__collection) / 2]
