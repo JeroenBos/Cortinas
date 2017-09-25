@@ -9,6 +9,8 @@ class Hyperparameter:
         return self.__dimensions
 
     def __init__(self, dimensions, values):
+        if values is None:
+            values = [d.default() for d in dimensions]
         assert len(dimensions) == len(values)
         self.__dimensions = dimensions
         self.__values = values
