@@ -5,7 +5,7 @@ from Examples.General1D import minimize
 from HyperparameterDistributions.NaturalNumberDistribution import NaturalNumberDistribution
 from HyperparameterDimension import HyperparameterDimension
 
-CLASS_SIZE = 50
+CLASS_SIZE = 5
 
 default_args = {'layers': [('input', layers.InputLayer),
                            ('dense1', layers.DenseLayer),
@@ -24,7 +24,7 @@ default_args = {'layers': [('input', layers.InputLayer),
                 'dropout1_p': 0.5,
                 'dropout1_shared_axes': (0,),
                 # dense2
-                'dense2_num_units': 1000,
+                # parameterized: 'dense2_num_units': 1000,
                 'dense2_nonlinearity': lasagne.nonlinearities.rectify,
                 'dense2_num_leading_axes': 1,
                 # dropout2
@@ -34,7 +34,7 @@ default_args = {'layers': [('input', layers.InputLayer),
                 'output_nonlinearity': lasagne.nonlinearities.softmax,
                 'output_num_leading_axes': 1,
                 # optimization method params
-                'update_learning_rate': 0.01,
+                'update_learning_rate': 0.1,
                 'output_num_units': CLASS_SIZE,
                 'update_momentum': 0.9,
                 'max_epochs': 50,
@@ -49,4 +49,5 @@ def truth(x):
 
 
 if __name__ == '__main__':
-    minimize(truth, default_args, HyperparameterDimension('dense1_num_units', NaturalNumberDistribution()))
+    minimize(truth, default_args, [HyperparameterDimension('dense1_num_units', NaturalNumberDistribution()),
+                                   HyperparameterDimension('dense2_num_units', NaturalNumberDistribution())])
