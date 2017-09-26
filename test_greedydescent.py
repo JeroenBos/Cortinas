@@ -6,14 +6,11 @@ from Estimation.ParabolicEstimationTechnique import ParabolicEstimationTechnique
 from ComputerAndEstimator import ComputerAndEstimator
 from HyperparameterDistributions.NaturalNumberDistribution import NaturalNumberDistribution
 from HyperparameterDistributions.RealNumberDistribution import RealNumberDistribution
-from HyperparameterDistributions.CollectionDistribution import CollectionDistribution
 from HyperparameterDimension import HyperparameterDimension
 from Hyperparameter import Hyperparameter
 
 
-
 class TestLinearEstimator(unittest.TestCase):
-
     def test_simple(self):
         y = ParabolicEstimationTechnique.estimate([(1, 1), (2, 2)], 3)
         self.assertEqual(y, 3)
@@ -24,7 +21,6 @@ class TestLinearEstimator(unittest.TestCase):
 
 
 class TestParabolaEstimator(unittest.TestCase):
-
     def test_simple(self):
         y = ParabolicEstimationTechnique.estimate([(0, 0), (1, 1), (2, 4)], 3)
         self.assertEqual(y, 9)
@@ -35,7 +31,6 @@ class TestParabolaEstimator(unittest.TestCase):
 
 
 class TestGreedyDescentNode(unittest.TestCase):
-
     def test_ordering(self):
         nodes = [GreedyDescentNode(None, 2),
                  GreedyDescentNode(None, 3),
@@ -56,7 +51,6 @@ class TestGreedyDescentNode(unittest.TestCase):
 
 
 class TestGreedyDescent(unittest.TestCase):
-
     def test_parabola(self):
 
         dimensions = [HyperparameterDimension(key='0', distribution=RealNumberDistribution())]
@@ -68,10 +62,10 @@ class TestGreedyDescent(unittest.TestCase):
 
         seed = Hyperparameter(dimensions, [-20])
 
-        def cost_heuristic(x):
+        def cost_heuristic(_x):
             return 0
 
-        def weigh_cost_loss(_estimated_loss, estimated_cost, x):
+        def weigh_cost_loss(_estimated_loss, estimated_cost, _x):
             return estimated_cost
 
         def debug(arg):
@@ -108,7 +102,7 @@ class TestGreedyDescent(unittest.TestCase):
         def cost_heuristic(_x):
             return 0
 
-        def weigh_cost_loss(estimated_loss, estimated_cost, x):
+        def weigh_cost_loss(estimated_loss, estimated_cost, _x):
             if estimated_loss is not None:
                 return estimated_loss
             return (estimated_loss if estimated_loss is not None else 0) - estimated_cost
@@ -144,11 +138,11 @@ class TestGreedyDescent(unittest.TestCase):
 
         seed = Hyperparameter(dimensions, [10, 10])
 
-        def cost_heuristic(x):
+        def cost_heuristic(_x):
             return 0
 
-        def debug(arg):
-            pass  # print('{' + str(arg[0]) + ', ' + str(arg[1]) + '},')
+        def debug(_arg):
+            pass  # print('{' + str(_arg[0]) + ', ' + str(_arg[1]) + '},')
 
         def abort(_, __, consecutive_higher):
             return consecutive_higher > 20
@@ -165,7 +159,6 @@ class TestGreedyDescent(unittest.TestCase):
 
 
 class TestErrorData:
-
     def __init__(self, magnitude):
         self.__magnitude = magnitude
 

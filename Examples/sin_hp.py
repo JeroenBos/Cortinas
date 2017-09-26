@@ -17,7 +17,7 @@ default_args = {'layers': [('input', layers.InputLayer),
                 # input
                 'input_shape': (None, 2),
                 # dense1
-                # hyperparamterized: 'dense1_num_units': 1000,
+                # parameterized: 'dense1_num_units': 1000,
                 'dense1_nonlinearity': lasagne.nonlinearities.rectify,
                 'dense1_num_leading_axes': 1,
                 # dropout1

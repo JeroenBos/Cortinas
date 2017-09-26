@@ -53,7 +53,3 @@ def create_nn(args, overriding_args):
 
 def lasagne_weigh(error, _cost, _v):
     return error
-
-
-
-

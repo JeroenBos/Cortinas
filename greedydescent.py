@@ -1,5 +1,5 @@
 from GreedyDescentNode import GreedyDescentNode
-from typing import Callable, Union, Tuple, Iterable, Optional
+from typing import Callable, Union, Tuple, Optional
 import ComputerAndEstimator
 
 # define 'scalar' to be 'float or int'. For now restricted to 'int'. Scaling can later be implemented to include floats
@@ -56,7 +56,8 @@ def minimize(error_computer: ComputerAndEstimator,
                     estimated_cost = cost_heuristic(x)
                     f = weigh(estimated_error, estimated_cost, x)  # means weighted cost/loss
                     if x in open_list:
-                        open_list[open_list.index(x)] = GreedyDescentNode(x, min(f, open_list[open_list.index(x)].error))
+                        x_index = open_list.index(x)
+                        open_list[x_index] = GreedyDescentNode(x, min(f, open_list[x_index].error))
                     else:
                         open_list.append(GreedyDescentNode(x, f))
         open_list.sort()  # PERF: could be omitted through heap structure
@@ -80,7 +81,3 @@ def get_neighbors(v) -> (Vector, int, int):
             new_v = v.step(dimension, step)
             if new_v is not None:
                 yield new_v, (dimension, step)
-
-
-
-

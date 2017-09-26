@@ -1,7 +1,7 @@
 from HyperparameterDistributions.RealNumberDistribution import RealNumberDistribution
 
-class HyperparameterDimension:
 
+class HyperparameterDimension:
     @property
     def key(self):
         return self.__key
@@ -18,9 +18,3 @@ class HyperparameterDimension:
     def step(self, current, step_size):
         index = self.__distribution.index(current)
         return self.__distribution.get(index + step_size, None)
-
-
-
-
-
-

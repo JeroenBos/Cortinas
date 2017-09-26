@@ -19,4 +19,3 @@ class ComputerAndEstimator:
             result = self.__compute(v)
             self.__cache[v] = result
         return result
-

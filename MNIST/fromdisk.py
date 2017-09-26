@@ -1,9 +1,5 @@
-import pickle
-
 import lasagne
-from nolearn.lasagne import NeuralNet
-from sklearn.metrics import confusion_matrix
-import blog
+from MNIST import blog
 import matplotlib.pyplot as plt
 from nolearn.lasagne import visualize
 import io
@@ -14,7 +10,7 @@ print('from disk: ' + filename_nn)
 
 def compute_accuracy(trues, predictions):
     if len(trues) != len(predictions):
-        raise "unequal sized arrays specified"
+        raise Exception("unequal sized arrays specified")
     result = 0
     for (true, prediction) in zip(trues, predictions):
         if true == prediction:
@@ -24,7 +20,7 @@ def compute_accuracy(trues, predictions):
 
 def indices_of_false_predictions(trues, predictions):
     if len(trues) != len(predictions):
-        raise "unequal sized arrays specified"
+        raise Exception("unequal sized arrays specified")
     result = []
     i = 0
     for (true, prediction) in zip(trues, predictions):
@@ -52,7 +48,7 @@ def show_false_prediction():
     y_test, predictions = get_predictions()
     indices_false = indices_of_false_predictions(y_test, predictions)
     if len(indices_false) == 0:
-        raise "100% correct prediction"
+        raise Exception("100% correct prediction")
     print(*indices_false, sep='\n')
     for index_false in indices_false:
         blog.show_test(index_false)
@@ -84,6 +80,8 @@ test_accuracy()
 import numpy as np
 from itertools import product
 
+
+# noinspection SpellCheckingInspection
 def p(figsize=(5, 5)):
     layer = net2.layers_['dense']
     W = layer.W.get_value()

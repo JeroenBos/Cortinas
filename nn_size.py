@@ -14,4 +14,3 @@ Get a function that computes the size of the nolearn.lasagne.NeuralNet given a h
         nparams = reduce(operator.add, [reduce(operator.mul, shape) for shape in shapes])
         return nparams  # TODO: take into account the number of epochs and maybe data size
     return compute_size
-

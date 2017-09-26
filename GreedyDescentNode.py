@@ -26,4 +26,3 @@ class GreedyDescentNode:
 
     def __repr__(self):
         return str(self.x) + ", cost = " + str(self.error)
-

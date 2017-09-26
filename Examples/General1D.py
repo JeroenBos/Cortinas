@@ -6,7 +6,7 @@ import greedydescent
 from LasagneComputerAndEstimator import LasagneComputerAndEstimator, lasagne_weigh
 import Visualization
 import HyperparameterDimension
-import nn_size
+
 
 def train(truth_f, truth_f_class_range_size, create_net_shape):
     """
@@ -76,5 +76,3 @@ def minimize(truth_f, default_nn_args, hyperdimensions):
         accuracies.append(node.error)
         pts = Visualization.underoverfitting.scale_batch(accuracies)
         Visualization.underoverfitting.plot(pts)
-
-

@@ -1,9 +1,7 @@
 import unittest
 import nn_size
-from nolearn.lasagne import NeuralNet
-from lasagne import layers
-import lasagne
 from MNIST.blog import create_net_shape
+
 
 class SizeComputation1(unittest.TestCase):
 
@@ -24,4 +22,3 @@ class SizeComputation1(unittest.TestCase):
         nn = create_net_shape(max_epochs=2)
         nn.initialize()  # takes 16 seconds
         return nn
-

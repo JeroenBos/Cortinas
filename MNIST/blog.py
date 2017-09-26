@@ -27,7 +27,6 @@
 #
 
 
-import matplotlib
 import matplotlib.pyplot as plt
 import matplotlib.cm as cm
 from urllib import request
@@ -40,9 +39,6 @@ import lasagne
 from lasagne import layers
 from lasagne.updates import nesterov_momentum
 from nolearn.lasagne import NeuralNet
-from nolearn.lasagne import visualize
-from sklearn.metrics import classification_report
-from sklearn.metrics import confusion_matrix
 
 print("Device: " + theano.config.device)
 num_epochs = 1000
