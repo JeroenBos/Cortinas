@@ -19,6 +19,7 @@ class LasagneComputerAndEstimator(ComputerAndEstimator):
                     result = get_cached_error_(v)
                     return result[0] if result is not None else None
                 return get_cache
+            # TODO: replace dummy estimator by real estimator
             return OneDimensionalEstimator(ParabolicEstimationTechnique(), error_selection(get_cached_error))
         super().__init__(self._compute, construct_estimator)
 
