@@ -3,6 +3,7 @@ import lasagne
 import numpy as np
 import math
 import Visualization.underoverfitting
+from nolearn.lasagne import NeuralNet
 
 
 def train_and_predict(train_data, train_truths, dev_data, dev_truths, create_nn, dev_func=None, **nn_kwargs):
@@ -51,3 +52,14 @@ def get_accuracy(input_layer, output_layer, data, truths, dev_batch_size):
 
     accuracy = np.mean(val_predictions == truths)
     return accuracy
+
+
+def train(nn, data):
+    train_data, train_truths, dev_data, dev_truths = data
+
+    nn.fit(train_data, train_truths)
+
+    train_accuracy = nn.train_history_[-1]['valid_accuracy']
+    dev_accuracy = get_accuracy(nn.layers_[0], nn.layers_[-1], dev_data, dev_truths, 100)
+    return train_accuracy, dev_accuracy
+

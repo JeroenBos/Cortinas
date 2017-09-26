@@ -63,7 +63,7 @@ def minimize(error_computer: ComputerAndEstimator,
 
         yield GreedyDescentNode(current, error)
 
-        if minimum_bias is None or error < minimum_bias:
+        if minimum_bias is None or (hasattr(error, '__lt__') and error < minimum_bias):
             minimum_bias = error
             consecutive_higher = 0
         else:

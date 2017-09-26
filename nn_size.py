@@ -8,7 +8,7 @@ Get a function that computes the size of the nolearn.lasagne.NeuralNet given a h
     :get_or_create_nn: A function that retrieves a nolearn.lasagne.NeuralNet given a hyperparameter v
     """
 
-    def compute_size(v):
+    def compute_size(v, _dv):
         nn = get_or_create_nn(v)
         shapes = [param.get_value().shape for param in nn.get_all_params(trainable=True) if param]
         nparams = reduce(operator.add, [reduce(operator.mul, shape) for shape in shapes])
