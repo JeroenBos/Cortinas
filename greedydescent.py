@@ -1,7 +1,7 @@
 from GreedyDescentNode import GreedyDescentNode
 from typing import Callable, Union, Tuple, Optional
 import ComputerAndEstimator
-import multiprocessing
+from multiprocessing.pool import ThreadPool
 
 # define 'scalar' to be 'float or int'. For now restricted to 'int'. Scaling can later be implemented to include floats
 Scalar = Union[float, int]
@@ -49,23 +49,24 @@ def minimize(error_computer: ComputerAndEstimator,
         error = error_computer.compute(current)
         closed_list.add(current)
 
-        xdx_list = get_neighbors(current)  # xdd stands for vector, dimension, direction
-        def compute_error(xdx):
+        def compute_error(xdx):  # xdd stands for vector, vector offset
             x_, dx = xdx
             if x_ in closed_list:
-                return None, x_
+                return None, None, x_
             result = error_computer.estimate(x_, dx)
-            return result, x_
-        estimated_errors = multiprocessing.Pool().map(compute_error, xdx_list)
-        for estimated_error, x in estimated_errors:
-            if estimated_error is not None:
-                estimated_cost = cost_heuristic(x)
-                f = weigh(estimated_error, estimated_cost, x)  # means weighted cost/loss
-                if x in open_list:
-                    x_index = open_list.index(x)
-                    open_list[x_index] = GreedyDescentNode(x, min(f, open_list[x_index].error))
-                else:
-                    open_list.append(GreedyDescentNode(x, f))
+            if result is not None:
+                estimated_cost_ = cost_heuristic(x_)
+                return estimated_error, estimated_cost_, x_
+            return None, None, x_
+
+        estimated_errors = ThreadPool(4).map_async(compute_error, get_neighbors(current)).get()
+        for estimated_error, estimated_cost, x in estimated_errors:
+            f = weigh(estimated_error, estimated_cost, x)  # means weighted cost/loss
+            if x in open_list:
+                x_index = open_list.index(x)
+                open_list[x_index] = GreedyDescentNode(x, min(f, open_list[x_index].error))
+            else:
+                open_list.append(GreedyDescentNode(x, f))
         open_list.sort()  # PERF: could be omitted through heap structure
 
         yield GreedyDescentNode(current, error)
