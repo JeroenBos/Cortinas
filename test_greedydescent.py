@@ -42,10 +42,10 @@ class TestGreedyDescentNode(unittest.TestCase):
                  GreedyDescentNode(None, 1),
                  GreedyDescentNode(None, 0)]
         nodes.sort()
-        self.assertEqual(nodes[0].cost, 0)
-        self.assertEqual(nodes[1].cost, 1)
-        self.assertEqual(nodes[2].cost, 2)
-        self.assertEqual(nodes[3].cost, 3)
+        self.assertEqual(nodes[0].error, 0)
+        self.assertEqual(nodes[1].error, 1)
+        self.assertEqual(nodes[2].error, 2)
+        self.assertEqual(nodes[3].error, 3)
 
     def test_containment(self):
         x0 = [0]
@@ -91,7 +91,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                weigh=weigh_cost_loss))
         self.assertEqual(result[0].x, (5,))
         for r in result:
-            print('x = ' + str(r.x) + ' with cost ' + str(r.cost))
+            print('x = ' + str(r.x) + ' with cost ' + str(r.error))
 
     def test_hyper_parabola(self):
 
@@ -130,7 +130,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                weigh=weigh_cost_loss))
         self.assertEqual(result[0].x, (8, -7))
         for r in result:
-            print('x = ' + str(r.x) + ' with cost ' + str(r.cost))
+            print('x = ' + str(r.x) + ' with cost ' + str(r.error))
 
     def test_error_type_parameter(self):
 
@@ -161,7 +161,7 @@ class TestGreedyDescent(unittest.TestCase):
                                                     cost_heuristic,
                                                     abort=abort,
                                                     debug=debug)):
-            print('x = ' + str(result.x) + ' with cost ' + str(result.cost))
+            print('x = ' + str(result.x) + ' with cost ' + str(result.error))
 
 
 class TestErrorData:

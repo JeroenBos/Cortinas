@@ -56,7 +56,7 @@ def minimize(error_computer: ComputerAndEstimator,
                     estimated_cost = cost_heuristic(x)
                     f = weigh(estimated_error, estimated_cost, x)  # means weighted cost/loss
                     if x in open_list:
-                        open_list[open_list.index(x)] = GreedyDescentNode(x, min(f, open_list[open_list.index(x)].cost))
+                        open_list[open_list.index(x)] = GreedyDescentNode(x, min(f, open_list[open_list.index(x)].error))
                     else:
                         open_list.append(GreedyDescentNode(x, f))
         open_list.sort()  # PERF: could be omitted through heap structure

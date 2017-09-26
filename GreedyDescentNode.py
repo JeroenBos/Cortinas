@@ -1,20 +1,20 @@
 class GreedyDescentNode:
 
-    def __init__(self, x, cost):
-        assert cost is not None
-        self.__cost = cost
+    def __init__(self, x, error):
+        assert error is not None
+        self.__error = error
         self.__x = x
 
     @property
-    def cost(self):
-        return self.__cost
+    def error(self):
+        return self.__error
 
     @property
     def x(self):
         return self.__x
 
     def __lt__(self, other):
-        return self.cost < other.cost
+        return self.error < other.error
 
     def __eq__(self, other):
         if other is GreedyDescentNode:
@@ -25,5 +25,5 @@ class GreedyDescentNode:
             return False
 
     def __repr__(self):
-        return str(self.x) + ", cost = " + str(self.cost)
+        return str(self.x) + ", cost = " + str(self.error)
 
