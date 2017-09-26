@@ -74,5 +74,7 @@ def minimize(truth_f, default_nn_args, hyperdimensions):
     seed = Hyperparameter.Hyperparameter(hyperdimensions, None)
     for node in greedydescent.minimize(computer, [seed], computer.try_compute_cost, weigh=lasagne_weigh):
         accuracies.append(node.error)
+        print(node.x)
         pts = Visualization.underoverfitting.scale_batch(accuracies)
         Visualization.underoverfitting.plot(pts)
+

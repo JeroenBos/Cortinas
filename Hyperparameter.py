@@ -70,3 +70,9 @@ class Hyperparameter:
     def keys(self):
         for dimension in self.dimensions:
             yield dimension.key
+
+    def __repr__(self):
+        result = ""
+        for name, value in zip((dim.key for dim in self.dimensions), self.__values):
+            result += "{}: {}\n".format(name, value)
+        return result
