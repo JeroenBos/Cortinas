@@ -1,7 +1,6 @@
 from GreedyDescentNode import GreedyDescentNode
 from typing import Callable, Union, Tuple, Optional
 import ComputerAndEstimator
-from multiprocessing.pool import ThreadPool
 
 # define 'scalar' to be 'float or int'. For now restricted to 'int'. Scaling can later be implemented to include floats
 Scalar = Union[float, int]
@@ -59,7 +58,7 @@ def minimize(error_computer: ComputerAndEstimator,
                 return result, estimated_cost_, x_
             return None, None, x_
 
-        estimated_errors = ThreadPool(4).map_async(compute_error, get_neighbors(current)).get()
+        estimated_errors = (compute_error(xdx) for xdx in get_neighbors(current))
         for estimated_error, estimated_cost, x in estimated_errors:
             f = weigh(estimated_error, estimated_cost, x)  # means weighted cost/loss
             if x in open_list:
