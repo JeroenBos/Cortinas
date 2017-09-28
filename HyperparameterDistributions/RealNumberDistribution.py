@@ -10,6 +10,6 @@ class RealNumberDistribution:
         assert isinstance(index, int)
         return index
 
-    @staticmethod
-    def default():
+    @property
+    def default(self):
         return 0

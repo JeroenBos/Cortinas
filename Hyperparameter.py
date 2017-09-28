@@ -10,7 +10,7 @@ class Hyperparameter:
 
     def __init__(self, dimensions, values):
         if values is None:
-            values = [d.distribution.default() for d in dimensions]
+            values = [d.distribution.default for d in dimensions]
         assert len(dimensions) == len(values)
         self.__dimensions = dimensions
         self.__values = values

@@ -1,15 +1,32 @@
 class NaturalNumberDistribution:
 
-    @staticmethod
-    def index(item):
+    def index(self, item):
         assert isinstance(item, int)
-        return item if item > 0 else None
 
-    @staticmethod
-    def get(index, default):
+        if item < 0:
+            return None
+
+        steps_from_default, rem = divmod(item - self.default, self.__step)
+        if rem != 0:
+            return None  # the item is 'stepped over'
+
+        offset = self.__default // self.__step
+        return steps_from_default + offset
+
+    def get(self, index, default):
         assert isinstance(index, int)
-        return index if index > 0 else default
 
-    @staticmethod
-    def default():
-        return 30
+        rough_result = index // self.__step
+        default_offset = self.__default % self.__step
+        result = rough_result + default_offset
+        return result if result >= 0 else default
+
+    @property
+    def default(self):
+        return self.__default
+
+    def __init__(self, default=30, step=1):
+        assert default >= 0
+        assert step > 0
+        self.__default = default
+        self.__step = step
