@@ -56,7 +56,7 @@ def minimize(error_computer: ComputerAndEstimator,
             result = error_computer.estimate(x_, dx)
             if result is not None:
                 estimated_cost_ = cost_heuristic(x_)
-                return estimated_error, estimated_cost_, x_
+                return result, estimated_cost_, x_
             return None, None, x_
 
         estimated_errors = ThreadPool(4).map_async(compute_error, get_neighbors(current)).get()
