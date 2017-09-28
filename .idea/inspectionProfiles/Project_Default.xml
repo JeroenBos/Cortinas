@@ -12,6 +12,7 @@
       <option name="ignoredIdentifiers">
         <list>
           <option value="matplotlib.cm.binary" />
+          <option value="types.ModuleType" />
         </list>
       </option>
     </inspection_tool>
