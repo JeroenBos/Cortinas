@@ -64,7 +64,7 @@ def minimize(error_computer: ComputerAndEstimator,
             if x in open_list:
                 x_index = open_list.index(x)
                 open_list[x_index] = GreedyDescentNode(x, min(f, open_list[x_index].error))
-            else:
+            elif f is not None:
                 open_list.append(GreedyDescentNode(x, f))
         open_list.sort()  # PERF: could be omitted through heap structure
 
